@@ -27,7 +27,7 @@ class DBOperationWrapper:
             constraints = []
             if "开通天数" in feed_dict:
                 constraints.append("开通天数 == %d" % (feed_dict["开通天数"]))
-            for slot in ["开通国家"]:  #“开通地区”暂未考虑
+            for slot in ["开通方向"]:  #“开通地区”暂未考虑
                 if slot in feed_dict:
                     constraints.append("{0} LIKE \'%{1}%\'".format(slot,feed_dict[slot]))
             command += " AND ".join(constraints)
@@ -125,6 +125,6 @@ class DBOperationWrapper:
 
 if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
-    for ii in operation.SearchingByConstraints("流量", {"套餐内容_国内流量_文字描述": "高"}):
-        print(dict(zip(LiuLiang_DB_slots, ii)))
+    for ii in operation.SearchingByConstraints("国际港澳台", {"开通方向": "肯尼亚"}):
+        print(dict(zip(Overseas_DB_slots, ii)))
 

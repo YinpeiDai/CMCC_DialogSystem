@@ -183,9 +183,9 @@ class DataManager:
             for item in self.DBoperation.SearchingByConstraints(table, feed_dict):
                 results.append(dict(zip(LiuLiang_DB_slots, item)))
             return results
-        elif table == "国际港澳台": ## TODO 张亦驰
+        elif table == "国际港澳台":
             for item in self.DBoperation.SearchingByConstraints(table, feed_dict):
-                results.append(dict(zip(TaoCan_DB_slots, item))) #  此处更改
+                results.append(dict(zip(Overseas_DB_slots, item))) #  此处更改
             return results
         return results
 
@@ -207,13 +207,13 @@ class DataManager:
             for item in self.DBoperation.SearchingByEntity(table, feed_dict):
                 results.append(dict(zip(WLAN_DB_slots, item)))
             return results
-        elif table == "国际港澳台": ## TODO 张亦驰
+        elif table == "国际港澳台":
             for item in self.DBoperation.SearchingByEntity(table, feed_dict):
-                results.append(dict(zip(TaoCan_DB_slots, item))) #  此处更改
+                results.append(dict(zip(Overseas_DB_slots, item))) #  此处更改
                 return results
-        elif table == "家庭多终端":  ## TODO 张亦驰
+        elif table == "家庭多终端":
             for item in self.DBoperation.SearchingByEntity(table, feed_dict):
-                results.append(dict(zip(TaoCan_DB_slots, item)))  # 此处更改
+                results.append(dict(zip(MultiTerminal_DB_slots, item)))  # 此处更改
                 return results
         return results
 
@@ -284,19 +284,21 @@ if __name__ == '__main__':
     # print(words)
     # train_word_and_char(file, words, True)
 
-    # # 测试 DataManager
-    # data_manager = DataManager('./tmp')
-    # for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [0, 100]}):
-    #     print(ii)
+    # 测试 DataManager
+    data_manager = DataManager('./tmp')
+    for ii in data_manager.SearchingByConstraints('国际港澳台', {"开通方向": "英国"}):
+        print(ii)
+    for ii in data_manager.SearchingByEntity('国际港澳台', {"子业务": "欧洲"}):
+        print(ii)
 
     # # 测试 sent2num
     # data_manager = DataManager('./tmp')
     # print(data_manager.sent2num([["要", "价格", "贵","的"]],5, 3))
 
-    # 展现某些训练数据
-    data_manager = DataManager('./tmp')
-    for ii in data_manager.DialogData['id71']['用户回复示例']:
-        print(ii)
+    # # 展现某些训练数据
+    # data_manager = DataManager('./tmp')
+    # for ii in data_manager.DialogData['id71']['用户回复示例']:
+    #     print(ii)
 
 
 
