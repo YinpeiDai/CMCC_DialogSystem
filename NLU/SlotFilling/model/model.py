@@ -3,6 +3,7 @@ informable slots 文字性描述的槽值对
 requestabe slots
 """
 import tensorflow as tf
+tf.set_random_seed(1234)
 
 class InformableSlotDector:
     """
@@ -16,12 +17,12 @@ class InformableSlotDector:
                  word_embed_size=20,
                  char_embed_size=20,
                  hidden_size=60,
-                 learning_rate=0.001,
+                 learning_rate=0.01,
                  word_feature_map=10 # window 1,2,3
                  ):
         self.name = name
         with tf.device('/gpu:0'), tf.variable_scope(name_or_scope=self.name,
-                                                    initializer=tf.truncated_normal_initializer(0, 0.1)):
+                                                    initializer=tf.truncated_normal_initializer(0, 0.01)):
             self.word_emb_matrix = tf.placeholder(dtype=tf.float32,
                                              shape=[None, max_sent_length, word_embed_size])
             self.char_emb_matrix = tf.placeholder(dtype=tf.float32,
@@ -29,6 +30,8 @@ class InformableSlotDector:
             self.input = tf.concat([self.word_emb_matrix, self.char_emb_matrix], 2)
             self.output = tf.placeholder(dtype=tf.int32, shape=[None])
             self.batch_size = tf.shape(self.word_emb_matrix)[0]
+
+            self.lr = tf.Variable(learning_rate, False, name='learning_rate')
 
             def conv_relu(inputs, filters, kernel, poolsize):
                 conv = tf.layers.conv1d(
@@ -79,7 +82,7 @@ class InformableSlotDector:
 
             with tf.variable_scope("train"):
                 self.tvars = tf.get_collection(key=tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate)
+                self.optimizer = tf.train.AdamOptimizer(self.lr)
                 self.l2_loss = [tf.nn.l2_loss(v) for v in self.tvars]
                 self.final_loss = tf.reduce_mean(self.loss) + 0.0001 * tf.add_n(self.l2_loss)
                 self.train_op = self.optimizer.minimize(self.final_loss)
@@ -92,6 +95,10 @@ class InformableSlotDector:
                                         tf.cast(self.output, tf.int32))
                 self.accuracy = tf.reduce_mean(tf.cast(self.correct, tf.float32))
 
+            with tf.name_scope('update_lr'):
+                self.new_lr = tf.placeholder(tf.float32, shape=[], name='new_lr')
+                self.update_lr = tf.assign(self.lr, self.new_lr)
+
 class RequestableSlotDector:
     """
     一个简单的 CNN
@@ -102,12 +109,12 @@ class RequestableSlotDector:
                  word_embed_size=20,
                  char_embed_size=20,
                  hidden_size=40,
-                 learning_rate=0.001,
+                 learning_rate=0.01,
                  word_feature_map=10 # window 1,2,3
                  ):
         self.name = name
         with tf.device('/gpu:0'), tf.variable_scope(name_or_scope=self.name,
-                                                    initializer=tf.truncated_normal_initializer(0, 0.1)):
+                                                    initializer=tf.truncated_normal_initializer(0, 0.01)):
             self.word_emb_matrix = tf.placeholder(dtype=tf.float32,
                                              shape=[None, max_sent_length, word_embed_size])
             self.char_emb_matrix = tf.placeholder(dtype=tf.float32,
@@ -115,6 +122,7 @@ class RequestableSlotDector:
             self.input = tf.concat([self.word_emb_matrix, self.char_emb_matrix], 2)
             self.output = tf.placeholder(dtype=tf.int32, shape=[None])
             self.batch_size = tf.shape(self.word_emb_matrix)[0]
+            self.lr = tf.Variable(learning_rate, False, name='learning_rate')
 
             def conv_relu(inputs, filters, kernel, poolsize):
                 conv = tf.layers.conv1d(
@@ -163,7 +171,7 @@ class RequestableSlotDector:
 
             with tf.variable_scope("train"):
                 self.tvars = tf.get_collection(key=tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate)
+                self.optimizer = tf.train.AdamOptimizer(self.lr)
                 self.l2_loss = [tf.nn.l2_loss(v) for v in self.tvars]
                 self.final_loss = tf.reduce_mean(self.loss) + 0.0001 * tf.add_n(self.l2_loss)
                 self.train_op = self.optimizer.minimize(self.final_loss)
@@ -175,6 +183,10 @@ class RequestableSlotDector:
                 self.correct = tf.equal(tf.cast(self.predict, tf.int32),
                                         tf.cast(self.output, tf.int32))
                 self.accuracy = tf.reduce_mean(tf.cast(self.correct, tf.float32))
+
+            with tf.name_scope('update_lr'):
+                self.new_lr = tf.placeholder(tf.float32, shape=[], name='new_lr')
+                self.update_lr = tf.assign(self.lr, self.new_lr)
 
 
 

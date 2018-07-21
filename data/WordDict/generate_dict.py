@@ -67,15 +67,15 @@ if __name__ == '__main__':
     from data.WordSeg.WordSegmentation import WordSegWrapper
     with open('../tmp/DialogData20180613.json',  'r', encoding='utf-8') as f:
         dialog_data = json.load(f)
-    CMCC_WordSeg = WordSegWrapper("../tmp/_add_words.txt", "../tmp/_del_words.txt")
+    CMCC_WordSeg = WordSegWrapper("../tmp")
     raw_data = []
     strings = ""
     for k, item in dialog_data.items():
         for sent in item["用户回复示例"]:
             strings += str(sent)
             raw_data.extend(CMCC_WordSeg.tokenize(str(sent)))
-    print(collections.Counter(raw_data).most_common(1500))
-    print(collections.Counter(strings).most_common(700))
+    print(len(collections.Counter(raw_data)))
+    print(len(collections.Counter(strings)))
 
 
     # dictgenerator = DictGenerator(['李小福', '是', '创新办', '主任', '也', '是', '云', '计算', '方面', '的', '专家', '；', '什么', '是', '八一', '双鹿', '\n'],

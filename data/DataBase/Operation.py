@@ -17,7 +17,7 @@ class DBOperationWrapper:
         文字描述的slots 统一 按“高”“中”“低”搜索
         :param table: 领域表名
         :param feed_dict: 搜索条件
-        :return: 搜索结果
+        :return: 搜索结果,按价格排序
         """
         if table == "国际港澳台":
             command = """
@@ -64,7 +64,7 @@ class DBOperationWrapper:
                 else:
                     constraints.append("套餐内容_国内主叫 <= 400.0")
 
-            command += " AND ".join(constraints)
+            command += " AND ".join(constraints) + "\nORDER BY 套餐内容_国内流量 DESC"
             return self.cur.execute(command)
         elif table == "流量":
             command = """
@@ -90,7 +90,7 @@ class DBOperationWrapper:
                 else:
                     constraints.append("套餐内容_国内流量 <= 400.0")
 
-            command += " AND ".join(constraints)
+            command += " AND ".join(constraints) + "\nORDER BY 套餐内容_国内流量 DESC"
             return self.cur.execute(command)
         else:
             return None
@@ -125,6 +125,8 @@ class DBOperationWrapper:
 
 if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
-    for ii in operation.SearchingByConstraints("流量", {"套餐内容_国内流量_文字描述": "高"}):
+    # for ii in operation.SearchingByConstraints("流量", {"套餐内容_国内流量_文字描述": "高"}):
+    #     print(dict(zip(LiuLiang_DB_slots, ii)))
+    for ii in operation.SearchingByEntity("流量", {"子业务": '20元地铁流量包'}):
         print(dict(zip(LiuLiang_DB_slots, ii)))
 

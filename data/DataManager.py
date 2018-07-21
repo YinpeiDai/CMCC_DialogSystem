@@ -284,14 +284,19 @@ if __name__ == '__main__':
     # print(words)
     # train_word_and_char(file, words, True)
 
-    # 测试 DataManager
+    # # 测试 DataManager
     # data_manager = DataManager('./tmp')
-    # print(data_manager.SearchingByConstraints('套餐', {"功能费": [0, 100]}))
+    # for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [0, 100]}):
+    #     print(ii)
 
-    # 测试 sent2num
+    # # 测试 sent2num
+    # data_manager = DataManager('./tmp')
+    # print(data_manager.sent2num([["要", "价格", "贵","的"]],5, 3))
+
+    # 展现某些训练数据
     data_manager = DataManager('./tmp')
-    print(data_manager.sent2num([["要", "价格", "贵","的"]],5, 3))
-
+    for ii in data_manager.DialogData['id71']['用户回复示例']:
+        print(ii)
 
 
 

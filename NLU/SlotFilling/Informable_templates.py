@@ -39,7 +39,7 @@ data_re2 = re.compile(r"(?P<Num1>[0-9一二两三四五六七八九十百千]+)"
 data_re3 = re.compile(r"(?P<MostLeast>至少|至多|最少|最多|最低|最高|"
                       r"(?:不要|不能|不可以|别|不|莫)?(?:超过|低于|高于|少于|多于|大于|小于))?"
                       r"(?:流量|能有|包含|包流量|包|含|)?(?P<Num>[0-9一二两三四五六七八九十百千]+)"
-                     r"(?:多个|多|个)?(?P<Metric>MB|GB|gb|mb|M|G|兆|m|g)(?P<Scope>以上|以内|之内|之外|以外|以下|内|之下)?")
+                     r"(?:多个|个多|多|个)?(?P<Metric>MB|GB|gb|mb|M|G|兆|m|g)(?P<Scope>以上|以内|之内|之外|以外|以下|内|之下)?")
 
 # # 开通天数模板， 目前暂不作为 informable slots
 # days_re = re.compile(r"(?P<MostLeast>至少|至多|最少|最多|最低|最高|"
@@ -61,6 +61,18 @@ def Chinese2num(sent):
         number = dict(zip("零一二两三四五六七八九",[0,1,2,2,3,4,5,6,7,8,9]))
         sent = re.sub(r"千([一二三四五六七八九])([^百]|$)", "千\g<1>百\g<2>", sent)
         sent = re.sub(r"百([一二三四五六七八九])([^十]|$)", "百\g<1>十\g<2>", sent)
+        sent = re.sub(r"0", "零", sent)
+        sent = re.sub(r"1", "一", sent)
+        sent = re.sub(r"2", "二", sent)
+        sent = re.sub(r"3", "三", sent)
+        sent = re.sub(r"4", "四", sent)
+        sent = re.sub(r"5", "五", sent)
+        sent = re.sub(r"6", "六", sent)
+        sent = re.sub(r"7", "七", sent)
+        sent = re.sub(r"8", "八", sent)
+        sent = re.sub(r"9", "九", sent)
+
+
         Nums = Num_re.findall(sent)
         num_list = []
         for num in Nums:
@@ -99,7 +111,7 @@ def Cost_match(user_utter):
     user_utter = re.sub(r"([一二两三四五六七八九]+)([到至][一二两三四五六七八九]+)([百十])", "\g<1>\g<3>\g<2>\g<3>", user_utter)
     if cost_re1.search(user_utter):
         data = cost_re1.search(user_utter)
-        print('re1:', data)
+        # print('re1:', data)
         num_list = []
         try:
             num1 = int(data.group("Num1"))
@@ -115,12 +127,14 @@ def Cost_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0]-50, 0), num_list[0]+50
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1]
+        else:
+            return None
     elif cost_re2.search(user_utter):
         num_list=[]
         data = cost_re2.search(user_utter)
-        print('re2:', data)
+        # print('re2:', data)
         try:
             num1 = int(data.group("Num1"))
         except Exception as e:
@@ -135,17 +149,20 @@ def Cost_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0]-50, 0), num_list[0]+50
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1]
+        else:
+            return None
     elif cost_re3.search(user_utter):
         num_list = []
         for data in cost_re3.findall(user_utter):
-            print('re3:',data)
+            # print('re3:',data)
             num = data[1]
             try:
                 num_list.append(int(num))
             except Exception as e:
-                num_list.extend(Chinese2num(num))
+                if sum(Chinese2num(num)) > 10:
+                    num_list.extend(Chinese2num(num))
             scope = data[2]
             mostleast = data[0]
             if re.match(r"至少|最少|最低|高于|超过|多于|大于|((不要|不能|不可以|别|不|莫)(低于|少于|小于))", mostleast):
@@ -159,9 +176,10 @@ def Cost_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0] - 50, 0), num_list[0] + 50
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1]
-    return  None
+        else:
+            return None
 
 def Time_match(user_utter):
     """
@@ -169,10 +187,11 @@ def Time_match(user_utter):
     还返回去除掉 通话时间匹配span 的句子，因为 功能费 有时不带单位，剔除比较好
     """
     user_utter = re.sub(r"([一二两三四五六七八九]+)([到至][一二两三四五六七八九]+)([百十])", "\g<1>\g<3>\g<2>\g<3>", user_utter)
+    user_utter = re.sub(r"钟头","小时",user_utter)
     if time_re1.search(user_utter):
         data = time_re1.search(user_utter)
         user_utter = time_re1.sub("",user_utter)
-        print('re1:', data)
+        # print('re1:', data)
         num_list = []
         if data.group("Metric2") == "小时" or data.group("Metric2") == "时" or data.group("Metric2") == "h":
             metric2 = 60
@@ -199,13 +218,15 @@ def Time_match(user_utter):
 
         if len(num_list) == 1:
             return max(num_list[0] - 100, 0), num_list[0] + 100, user_utter
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], user_utter
+        else:
+            return None
     elif time_re2.search(user_utter):
         num_list = []
         data = time_re2.search(user_utter)
         user_utter = time_re2.sub("",user_utter)
-        print('re2:', data)
+        # print('re2:', data)
         if data.group("Metric2") == "小时" or data.group("Metric2") == "时" or data.group("Metric2") == "h":
             metric2 = 60
         else:
@@ -230,12 +251,14 @@ def Time_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0] - 100, 0), num_list[0] + 100, user_utter
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], user_utter
+        else:
+            return None
     elif time_re3.search(user_utter):
         num_list = []
         for data in time_re3.findall(user_utter):
-            print('re3:', data)
+            # print('re3:', data)
             num = data[1]
             metric = data[2]
             if metric == "小时" or metric == "时" or metric == "h":
@@ -260,9 +283,10 @@ def Time_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0] - 100, 0), num_list[0] + 100, newsent
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], newsent
-    return None
+        else:
+            return None
 
 def Data_match(user_utter):
     """
@@ -272,7 +296,7 @@ def Data_match(user_utter):
     if data_re1.search(user_utter):
         data = data_re1.search(user_utter)
         user_utter = data_re1.sub("", user_utter)
-        print('re1:', data.groups())
+        # print('re1:', data.groups())
         num_list = []
         if data.group("Metric2") != None and re.match(r"(GB|G|gb|g)", data.group("Metric2")):
             metric2 = 1024
@@ -299,13 +323,15 @@ def Data_match(user_utter):
 
         if len(num_list) == 1:
             return max(num_list[0] - 200, 0), num_list[0] + 200, user_utter
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], user_utter
+        else:
+            return None
     elif data_re2.search(user_utter):
         num_list = []
         data = data_re2.search(user_utter)
         user_utter = data_re2.sub("", user_utter)
-        print('re2:', data)
+        # print('re2:', data)
         if data.group("Metric2") != None and re.match(r"GB|G|gb|g", data.group("Metric2")):
             metric2 = 1024
         else:
@@ -330,12 +356,14 @@ def Data_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0] - 200, 0), num_list[0] + 200, user_utter
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], user_utter
+        else:
+            return None
     elif data_re3.search(user_utter):
         num_list = []
         for data in data_re3.findall(user_utter):
-            print('re3:', data)
+            # print('re3:', data)
             num = data[1]
             metric = data[2]
             if metric != None and re.match(r"GB|G|gb|g", metric):
@@ -360,9 +388,10 @@ def Data_match(user_utter):
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
             return max(num_list[0] - 200, 0), num_list[0] + 200, newsent
-        else:
+        elif len(num_list) > 1:
             return num_list[0], num_list[-1], newsent
-    return None
+        else:
+            return None
 
 def Match_Cost_Time_Data(user_utter):
     """
@@ -384,7 +413,6 @@ def Match_Cost_Time_Data(user_utter):
         results["套餐内容_国内主叫"] = (time[0], time[1])
     return results
 
-
 def Country_match(user_utter):
     """
     输入用户句子 ，输出匹配到的开通方向， 否则返回None
@@ -394,5 +422,9 @@ def Country_match(user_utter):
 
 if __name__ == '__main__':
     data_manager = DataManager('../../data/tmp')
-    for sent in data_manager.DialogData['id116']["用户回复示例"]:
-            print(sent, '|', data_manager.WordSegmentCut(sent))
+    # for sent in data_manager.DialogData['id58']["用户回复示例"]:
+    #         print(sent)
+    #         print(Match_Cost_Time_Data(sent))
+    while True:
+        input_usr = input("请输入：")
+        print(Match_Cost_Time_Data(input_usr))
