@@ -75,11 +75,9 @@ class RulePolicy:
 
     def Reply(self, CurrrentDialogState):
         """
-        return reply or NLG_template(DA)
-        'reply':str, 'DA': dict
+        return System Action for NLG
         :param CurrrentDialogState: 对话状态
-        :param NLG_template: 给 DA 返回文字
-        :return: str
+        :return: dict
         """
         # 根据 BeliefState 更新 未提及的 informable slots
         self.informable_slots = CurrrentDialogState["BeliefState"]["curr_turn"]
