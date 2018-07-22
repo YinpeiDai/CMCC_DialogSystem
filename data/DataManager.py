@@ -174,6 +174,11 @@ class DataManager:
 
 
     def SearchingByConstraints(self, table, feed_dict):
+        """
+        :param table:  数据库的table
+        :param feed_dict: Slot-filling 模块 SlotFillingDector.get_informable_slots_results 直接给出
+        :return: list of  所有符合要求的套餐
+        """
         results = []
         if table == "套餐":
             for item in self.DBoperation.SearchingByConstraints(table, feed_dict):
@@ -286,10 +291,10 @@ if __name__ == '__main__':
 
     # 测试 DataManager
     data_manager = DataManager('./tmp')
-    for ii in data_manager.SearchingByConstraints('国际港澳台', {"开通方向": "英国"}):
+    for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [150, 300]}):
         print(ii)
-    for ii in data_manager.SearchingByEntity('国际港澳台', {"子业务": "欧洲"}):
-        print(ii)
+    # for ii in data_manager.SearchingByEntity('国际港澳台', {"子业务": "欧洲"}):
+    #     print(ii)
 
     # # 测试 sent2num
     # data_manager = DataManager('./tmp')

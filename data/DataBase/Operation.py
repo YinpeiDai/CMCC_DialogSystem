@@ -92,6 +92,24 @@ class DBOperationWrapper:
 
             command += " AND ".join(constraints)
             return self.cur.execute(command)
+        elif table == "WLAN":
+            command = """
+            SELECT * FROM WLAN
+            WHERE
+            """
+            constraints = []
+            for slot in ["功能费"]:
+                if slot in feed_dict:
+                    constraints.append("%s >= %f AND %s <= %f" % (slot, feed_dict[slot][0], slot, feed_dict[slot][1]))
+            if "功能费_文字描述" in feed_dict:
+                if feed_dict["功能费_文字描述"] == "高":
+                    constraints.append("功能费 >= 300.0 ")
+                elif feed_dict["功能费_文字描述"] == "中":
+                    constraints.append("功能费 >= 100.0 AND 功能费 < 300.0")
+                else:
+                    constraints.append("功能费 < 100.0")
+            command += " AND ".join(constraints)
+            return self.cur.execute(command)
         else:
             return None
 
@@ -125,6 +143,6 @@ class DBOperationWrapper:
 
 if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
-    for ii in operation.SearchingByConstraints("国际港澳台", {"开通方向": "肯尼亚"}):
+    for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
         print(dict(zip(Overseas_DB_slots, ii)))
 
