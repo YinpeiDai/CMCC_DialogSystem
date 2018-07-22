@@ -1,0 +1,8 @@
+
+domain:个人, loss 0.0931, accu 0.9917
+domain:套餐, loss 0.0812, accu 0.9956
+domain:流量, loss 0.0752, accu 1.0000
+domain:WLAN, loss 0.1851, accu 0.9394
+domain:号卡, loss 0.0691, accu 1.0000
+domain:国际港澳台, loss 0.0894, accu 0.9911
+domain:家庭多终端, loss 0.1331, accu 0.9725
