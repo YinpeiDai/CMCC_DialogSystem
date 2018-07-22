@@ -87,8 +87,6 @@ class SlotFillingDector:
                 results_dict["开通方向"] = value
         return results_dict
 
-        return results_dict
-
     def get_requestable_slots_results(self, user_utter, data_manager):
         """
         给定输入句子，上一轮DA, 本轮检测出来的领域、用户动作
