@@ -14,7 +14,7 @@ def train(user_act_dataset):
     :param data_tmp_path:  data tmp 文件夹位置
     """
     print('载入 user_act 模型...')
-    model = UserActDetector("UserActDect")
+    model = UserActModel("UserActDect")
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.allow_growth = True
     tf_config.allow_soft_placement=True
@@ -69,7 +69,7 @@ def evaluate(user_act_dataset):
     :param data_tmp_path:  data tmp 文件夹位置
     """
     print('载入 user_act 模型...')
-    model = UserActDetector("UserActDect")
+    model = UserActModel("UserActDect")
 
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.allow_growth = True

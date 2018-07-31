@@ -14,7 +14,7 @@ def train(domain_dataset):
     :param data_tmp_path:  data tmp 文件夹位置
     """
     print('载入 Domain 模型...')
-    model = DomainDetector("DomDect")
+    model = DomainModel("DomDect")
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.allow_growth = True
     tf_config.allow_soft_placement=True
@@ -69,7 +69,7 @@ def evaluate(domain_dataset):
     :param data_tmp_path:  data tmp 文件夹位置
     """
     print('载入 Domain 模型...')
-    model = DomainDetector("DomDect")
+    model = DomainModel("DomDect")
 
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.allow_growth = True

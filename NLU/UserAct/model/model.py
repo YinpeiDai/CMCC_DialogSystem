@@ -3,7 +3,7 @@
 """
 import tensorflow as tf
 
-class UserActDetector:
+class UserActModel:
     """
     一个简单的 CNN
     文字描述，输出为 高、中、低、无

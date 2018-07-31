@@ -7,11 +7,11 @@ from NLU.UserAct.model.model import *
 from data.DataManager import DataManager
 import tensorflow as tf
 
-class GetUserAct:
+class UserActDetector:
     def __init__(self, model_path):
         self.tf_graph = tf.Graph()
         with self.tf_graph.as_default():
-            self.model = UserActDetector("UserActDect")
+            self.model = UserActModel("UserActDect")
             tf_config = tf.ConfigProto()
             tf_config.gpu_options.allow_growth = True
             tf_config.allow_soft_placement=True
@@ -27,12 +27,15 @@ class GetUserAct:
         # TODO： 可能还有别的参数，亦驰你自己来定
         :param user_utter: 输入句子，不用分词
         :return: a domain string in
-                    ["个人", "套餐", "流量", "WLAN", "号卡", "国际港澳台", "家庭多终端" ]
+                    ['问询', '告知', '要求更多', '要求更少', '更换', '问询说明',
+                     '话题=WLAN', '话题=号卡', '话题=套餐流量', '话题=资源分享',
+                     '同时办理', '比较', '闲聊']
+                     and its probability
         TODO: Add last_domain information
         """
-        user_acts = [    '问询', '告知', '要求更多', '要求更少', '更换', '问询说明', '话题=WLAN', '话题=号卡', '话题=套餐流量', '话题=资源分享',
-    '同时办理', '比较', '闲聊'
-]
+        user_acts = [ '问询', '告知', '要求更多', '要求更少', '更换', '问询说明',
+                             '话题=WLAN', '话题=号卡', '话题=套餐流量', '话题=资源分享',
+                             '同时办理', '比较', '闲聊']
         batch_data = [user_utter]
         char_emb_matrix, word_emb_matrix, _ = data_manager.sent2num(batch_data)
         predict, probs = self.sess.run([self.model.predict,
@@ -51,7 +54,7 @@ class GetUserAct:
 
 
 if __name__ == '__main__':
-    UADetector = GetUserAct("./model/ckpt")
+    UADetector = UserActDetector("./model/ckpt")
     data_manager = DataManager('../../data/tmp')
     while True:
         usr_input = input("请输入：")

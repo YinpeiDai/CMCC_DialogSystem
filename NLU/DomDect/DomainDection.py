@@ -7,11 +7,11 @@ from NLU.DomDect.model.model import *
 from data.DataManager import DataManager
 import tensorflow as tf
 
-class GetDomain:
+class DomainDetector:
     def __init__(self, model_path):
         self.tf_graph = tf.Graph()
         with self.tf_graph.as_default():
-            self.model = DomainDetector("DomDect")
+            self.model = DomainModel("DomDect")
             tf_config = tf.ConfigProto()
             tf_config.gpu_options.allow_growth = True
             tf_config.allow_soft_placement=True
@@ -26,6 +26,7 @@ class GetDomain:
         :param user_utter: 输入句子，不用分词
         :return: a domain string in
                     ["个人", "套餐", "流量", "WLAN", "号卡", "国际港澳台", "家庭多终端" ]
+                    and its probability
         TODO: Add last_domain information
         """
         domains = ["个人", "套餐", "流量", "WLAN", "号卡", "国际港澳台", "家庭多终端" ]
@@ -47,7 +48,7 @@ class GetDomain:
 
 
 if __name__ == '__main__':
-    DomDetector = GetDomain("./model/ckpt")
+    DomDetector = DomainDetector("./model/ckpt")
     data_manager = DataManager('../../data/tmp')
     while True:
         usr_input = input("请输入：")

@@ -4,7 +4,7 @@
 import tensorflow as tf
 
 # requestable slots 对应的 DialogData20180613 的 id, 用于指导生成训练数据
-class DomainDetector:
+class DomainModel:
     """
     一个简单的 CNN
     文字描述，输出为 高、中、低、无
@@ -129,7 +129,7 @@ class DomainDetector:
 
 
 if __name__ == '__main__':
-    informable_slots = DomainDetector(name='test')
+    informable_slots = DomainModel(name='test')
 
 
 

@@ -2,7 +2,7 @@
 业务实体识别
 """
 
-class EntityDector:
+class EntityDetector:
     def __init__(self):
         pass
 
@@ -13,3 +13,6 @@ class EntityDector:
         :return: tuple
         """
         return (None, user_utter)
+
+    def close(self):
+        pass

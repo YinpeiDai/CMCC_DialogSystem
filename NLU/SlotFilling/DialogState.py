@@ -20,7 +20,7 @@ All_countries = {'乌拉圭', '芬兰艾伦岛', '冰岛', '西班牙马略卡�
                  '卢森堡', '孟加拉', '马达加斯加', '印度尼西亚', '菲律宾', '巴布达', '巴拉圭', '孟加拉国', '萨摩亚', '西班牙福门特拉', '法国科西嘉岛', '瓜德罗普岛', '希腊基克拉泽', '白俄罗斯', '圣马力诺', '委内瑞拉', '玻利维亚', '安圭拉', '圣基茨和尼维斯', '马来西亚', '伊拉克', '东帝汶', '格陵兰', '老挝', '阿曼', '卢旺达', '西班牙加那利群岛', '香港', '瑞典', '匈牙利', '挪威', '哥伦比亚', '留尼汪岛', '厄瓜多尔', '赞比亚', '厄兰岛', '荷兰', '维尔京群岛', '摩洛哥', '黑山', '拉脱维亚', '罗马尼亚', '西奥仑群岛', '智利', '巴巴多斯',
                  '波多黎各', '爱奥尼亚', '黎巴嫩', '航空漫游', '瓦努阿图', '安哥拉'}
 
-class SlotFillingDector:
+class SlotFillingDetector:
     """
     给出 informable slots 和 requestable slots
     """
@@ -113,7 +113,7 @@ class SlotFillingDector:
         self.requestable_sess.close()
 
 if __name__ == '__main__':
-    slot_filling = SlotFillingDector("./model/ckpt")
+    slot_filling = SlotFillingDetector("./model/ckpt")
     data_manager = DataManager('../../data/tmp')
     while True:
         usr_input = input("请输入：")
