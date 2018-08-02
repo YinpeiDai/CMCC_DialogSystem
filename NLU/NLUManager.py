@@ -39,6 +39,7 @@ class NLUManager:
         result['requestable'] = self.SlotFillingDetector.get_requestable_slots_results(user_utter, data_manager)
         result['entity'] = None    #TODO: entity recognize
         result['sentiment'] = None   # TODO: sentimental detection
+        result['userutter'] = user_utter
         return result
 
     def close(self):

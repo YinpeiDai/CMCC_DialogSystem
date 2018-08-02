@@ -102,11 +102,20 @@ class DialogStateTracker:
         self.DetectedDomain['curr_turn'] =NLU_results['domain']
         self.UserAct['curr_turn'] = NLU_results['useract']
         # TODO: sentiment
+        # self.detected_sentiment = ?
 
         self.UserPersenal = self.UserPersenal  #个人信息不变
         self.QueryResult = DataManager.SearchingByConstraints(
             table=NLU_results['domain'], feed_dict=NLU_results['informable'])
         self.SystemReturnAct = rule_policy.Reply(self.DialogState)
+
+        self.isUtterSame = True if self.user_utter == NLU_results['userutter'] else False
+
+        self.isDSTChange = False
+        for key,value in self.DialogState.items():
+            if 'prev_turn' in value.keys():
+                if value['prev_turn'] != value['curr_turn']:
+                    self.isDSTChange = True
 
         pass
 
@@ -115,7 +124,7 @@ class DialogStateTracker:
 
 
 if __name__ == '__main__':
-    dst = DialodStateTracker()
+    dst = DialodStateTracker(usr_personal)
     dst.MentionedEntitySet.append(1)
     dst.MentionedEntitySet.append(2)
     dst.MentionedEntitySet.append(3)
