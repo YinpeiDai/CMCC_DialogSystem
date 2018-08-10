@@ -118,3 +118,4 @@ if __name__ == '__main__':
     while True:
         usr_input = input("请输入：")
         print(slot_filling.get_informable_slots_results(usr_input, data_manager))
+        print(slot_filling.get_requestable_slots_results(usr_input, data_manager))
