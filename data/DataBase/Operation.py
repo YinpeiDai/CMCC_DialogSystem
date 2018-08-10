@@ -33,7 +33,11 @@ class DBOperationWrapper:
                 if slot in feed_dict:
                     constraints.append("{0} LIKE \'%{1}%\'".format(slot,feed_dict[slot]))
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
         elif table == "套餐":
             command = """
                             SELECT * FROM 套餐
@@ -67,7 +71,11 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内主叫 <= 400.0")
 
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
         elif table == "流量":
             command = """
                             SELECT * FROM 流量
@@ -93,7 +101,11 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内流量 <= 400.0")
 
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
         elif table == "WLAN":
             command = """
             SELECT * FROM WLAN
@@ -111,9 +123,13 @@ class DBOperationWrapper:
                 else:
                     constraints.append("功能费 < 100.0")
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
         else:
-            return None
+            return []
 
     def SearchingByEntity(self, table, feed_dict):
         if table == "Card":
@@ -124,9 +140,13 @@ class DBOperationWrapper:
             constraints = []
             for slot in ["号卡"]:
                 if slot in feed_dict:
-                    constraints.append("{0} LIKE \'%{1}%\'".format(slot, feed_dict[slot]))
+                    constraints.append("{0} LIKE \'{1}\'".format(slot, feed_dict[slot]))
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
         else:
             command = """
             SELECT * FROM %s
@@ -135,9 +155,13 @@ class DBOperationWrapper:
             constraints = []
             for slot in ["子业务", "主业务"]:
                 if slot in feed_dict:
-                    constraints.append("{0} LIKE \'%{1}%\'".format(slot, feed_dict[slot]))
+                    constraints.append("{0} LIKE \'{1}\'".format(slot, feed_dict[slot]))
             command += " AND ".join(constraints)
-            return self.cur.execute(command)
+            try:
+                return_results = [item for item in self.cur.execute(command)]
+            except:
+                return_results = []
+            return return_results
 
     def close(self):
         self.conn.close()
@@ -148,8 +172,6 @@ if __name__ == '__main__':
     # for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
     #     print(dict(zip(Overseas_DB_slots, ii)))
 
-
-
-    for ii in operation.SearchingByEntity("套餐", {"主业务": '畅享套餐'}):
-        print(dict(zip(TaoCan_DB_slots, ii))['子业务'])
+    for ii in operation.SearchingByEntity("套餐", {"子业务": "88元畅享套餐"}):
+        print(ii)
 

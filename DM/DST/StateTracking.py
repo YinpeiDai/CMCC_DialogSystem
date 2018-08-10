@@ -27,7 +27,7 @@ main_bussiness_dict = ['畅享套餐', '畅享不限量套餐','88商旅套餐',
 card_dict = ['4G包年卡', '4G飞享卡', '4G任我用卡', '4G爱家卡', '8元卡', '万能副卡']
 
 DB_tables = ['套餐', '流量', 'WLAN',  '国际港澳台', '家庭多终端']
-# card的entity search有bug
+
 
 DialogStateSample = {
     'TurnNum':int,
