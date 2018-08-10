@@ -140,7 +140,7 @@ class DBOperationWrapper:
             constraints = []
             for slot in ["号卡"]:
                 if slot in feed_dict:
-                    constraints.append("{0} LIKE \'%{1}%\'".format(slot, feed_dict[slot]))
+                    constraints.append("{0} LIKE \'{1}\'".format(slot, feed_dict[slot]))
             command += " AND ".join(constraints)
             try:
                 return_results = [item for item in self.cur.execute(command)]
@@ -155,7 +155,7 @@ class DBOperationWrapper:
             constraints = []
             for slot in ["子业务", "主业务"]:
                 if slot in feed_dict:
-                    constraints.append("{0} LIKE \'%{1}%\'".format(slot, feed_dict[slot]))
+                    constraints.append("{0} LIKE \'{1}\'".format(slot, feed_dict[slot]))
             command += " AND ".join(constraints)
             try:
                 return_results = [item for item in self.cur.execute(command)]
@@ -171,4 +171,7 @@ if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
     # for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
     #     print(dict(zip(Overseas_DB_slots, ii)))
+
+    for ii in operation.SearchingByEntity("套餐", {"子业务": "88元畅享套餐"}):
+        print(ii)
 

@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [700, 900]}):
     #     # print(ii)
     #     print(ii['子业务'])
-    for ii in data_manager.SearchingByEntity("Card", {"号卡": '4G飞享卡'}):
+    for ii in data_manager.SearchingByEntity("套餐", {"子业务": '88元畅享套餐'}):
         print(ii)
 
     # # 测试 sent2num
