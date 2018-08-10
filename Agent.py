@@ -43,37 +43,11 @@ class DialogAgent:
         self.dialog_history = []
 
     def run(self):
-        last_DA = None
+        last_DA = None   # ?
         while True:
             user_utter = input("用户输入：")
             nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
             self.dst.update(nlu_results, self.rule_policy, self.data_manager)
-
-            print('\n\nprint DST:')
-            for k,v in self.dst.DialogState.items():
-                if k == 'OfferedResult':
-                    print(k)
-                    if '子业务' in v['prev_turn'] :
-                        print(v['prev_turn']['子业务'])
-                    if '子业务' in v['curr_turn']:
-                        print(v['curr_turn']['子业务'])
-                elif k == 'QueryResults':
-                    print(k)
-                    for ent in v:
-                        print(ent['子业务'])
-                else:
-                    if k=='SystemAct':
-                        print(k)
-                        for kk,vv in v.items():
-                            if kk == 'offer':
-                                pass
-                            else:
-                                print(kk,vv)
-                    else:
-                        print(k,v)
-            print('\n\n')
-
-
             reply  = rule_based_NLG(self.dst.DialogState['SystemAct']['curr_turn'])
             print(reply)
             self.dialog_history.append({"系统":reply, "用户":user_utter})
@@ -84,6 +58,32 @@ if __name__ == '__main__':
     agent.run()
 
 
+
+
+
+            # print('\n\nprint DST:')
+            # for k,v in self.dst.DialogState.items():
+            #     if k == 'OfferedResult':
+            #         print(k)
+            #         if '子业务' in v['prev_turn'] :
+            #             print(v['prev_turn']['子业务'])
+            #         if '子业务' in v['curr_turn']:
+            #             print(v['curr_turn']['子业务'])
+            #     elif k == 'QueryResults':
+            #         print(k)
+            #         for ent in v:
+            #             print(ent['子业务'])
+            #     else:
+            #         if k=='SystemAct':
+            #             print(k)
+            #             for kk,vv in v.items():
+            #                 if kk == 'offer':
+            #                     pass
+            #                 else:
+            #                     print(kk,vv)
+            #         else:
+            #             print(k,v)
+            # print('\n\n')
 
 
 
