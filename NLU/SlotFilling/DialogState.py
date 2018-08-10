@@ -118,4 +118,6 @@ class SlotFillingDetector:
 if __name__ == '__main__':
     slot_filling = SlotFillingDetector("./model/ckpt")
     data_manager = DataManager('../../data/tmp')
-    
+    while True:
+        usr_input = input("请输入：")
+        print(slot_filling.get_requestable_slots_results(usr_input, data_manager))

@@ -293,11 +293,11 @@ if __name__ == '__main__':
 
     # 测试 DataManager
     data_manager = DataManager('./tmp')
-    for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [700, 900]}):
-        # print(ii)
-        print(ii['子业务'])
-    # for ii in data_manager.SearchingByEntity('国际港澳台', {"子业务": "欧洲"}):
-    #     print(ii)
+    # for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [700, 900]}):
+    #     # print(ii)
+    #     print(ii['子业务'])
+    for ii in data_manager.SearchingByEntity("Card", {"号卡": '4G飞享卡'}):
+        print(ii)
 
     # # 测试 sent2num
     # data_manager = DataManager('./tmp')
