@@ -14,7 +14,7 @@ save_path_dict = {
     'domain': './DomDect/model/ckpt',
     'useract': './UserAct/model/ckpt',
     'slotfilling': './SlotFilling/model/ckpt',
-    'entity': './ER',
+    'entity': './ER/entity_list.txt',
     'sentiment': './SentiDect'
 }
 
@@ -33,12 +33,14 @@ class NLUManager:
         :return:
         """
         result = {}
+        ent_list, user_utter_without_ent = self.EntityDetector.get_ER_results(user_utter)
+        result['entity'] = ent_list
         result['domain'] = self.DomainDetector.get_domain_results(user_utter, data_manager)
         result['useract'] = self.UserActDetector.get_user_act_results(user_utter, data_manager)
-        result['informable'] = self.SlotFillingDetector.get_informable_slots_results(user_utter, data_manager)
-        result['requestable'] = self.SlotFillingDetector.get_requestable_slots_results(user_utter, data_manager)
-        result['entity'] = None    #TODO: entity recognize
+        result['informable'] = self.SlotFillingDetector.get_informable_slots_results(user_utter_without_ent, data_manager)
+        result['requestable'] = self.SlotFillingDetector.get_requestable_slots_results(user_utter_without_ent, data_manager)
         result['sentiment'] = None   # TODO: sentimental detection
+        result['userutter'] = user_utter
         return result
 
     def close(self):
@@ -50,4 +52,4 @@ class NLUManager:
 
 
 if __name__ == '__main__':
-    nlu_manager = NLUManager()
+    nlu_manager = NLUManager(save_path_dict)

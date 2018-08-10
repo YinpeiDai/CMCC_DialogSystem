@@ -3,7 +3,7 @@
 """
 
 class SentimentDetector:
-    def __init__(self):
+    def __init__(self, load_path):
         pass
 
     def get_Senti_results(self, user_utter):

@@ -3,6 +3,8 @@
 2. 能够提供查询数据库、分词、查词典、查词向量、查ontology 数据交换的接口
 3. 个人信息返回
 """
+import sys
+sys.path.append('..')
 
 from data.WordDict.generate_dict import DictGenerator
 from data.WordDict.word2vec import NCE_word2vec
@@ -291,8 +293,9 @@ if __name__ == '__main__':
 
     # 测试 DataManager
     data_manager = DataManager('./tmp')
-    for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [150, 300]}):
-        print(ii)
+    for ii in data_manager.SearchingByConstraints('套餐', {"功能费": [700, 900]}):
+        # print(ii)
+        print(ii['子业务'])
     # for ii in data_manager.SearchingByEntity('国际港澳台', {"子业务": "欧洲"}):
     #     print(ii)
 

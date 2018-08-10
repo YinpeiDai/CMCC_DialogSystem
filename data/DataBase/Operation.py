@@ -1,6 +1,8 @@
 """
 包含查询数据库的操作
 """
+import sys
+sys.path.append('../..')
 import sqlite3
 from data.DataBase.Ontology import *
 
@@ -143,6 +145,11 @@ class DBOperationWrapper:
 
 if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
-    for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
-        print(dict(zip(Overseas_DB_slots, ii)))
+    # for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
+    #     print(dict(zip(Overseas_DB_slots, ii)))
+
+
+
+    for ii in operation.SearchingByEntity("套餐", {"主业务": '畅享套餐'}):
+        print(dict(zip(TaoCan_DB_slots, ii))['子业务'])
 
