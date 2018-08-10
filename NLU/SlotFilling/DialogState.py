@@ -9,6 +9,7 @@ sys.path.append('../..')
 import tensorflow as tf
 import numpy as np
 import os
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 from NLU.SlotFilling.model.model import InformableSlotDector, RequestableSlotDector
 from data.DataManager import DataManager
 from NLU.SlotFilling.model.train import  All_requestable_slots_order
