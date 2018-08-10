@@ -3,6 +3,9 @@ informable slots and requestable slots 当前轮的识别结果
 informable slots 主要有 "功能费","套餐内容_国内主叫","套餐内容_国内流量" "开通天数"
 "开通方向"。  文字描述用简化版的EDST模型预测，数值描述用正则表达式来匹配。
 """
+import sys
+sys.path.append('../..')
+
 import tensorflow as tf
 import numpy as np
 import os
@@ -118,3 +121,6 @@ if __name__ == '__main__':
     while True:
         usr_input = input("请输入：")
         print(slot_filling.get_informable_slots_results(usr_input, data_manager))
+    # while True:
+    #     usr_input = input("请输入：")
+    #     print(slot_filling.get_requestable_slots_results(usr_input, data_manager))

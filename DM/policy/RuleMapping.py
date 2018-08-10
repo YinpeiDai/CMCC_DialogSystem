@@ -1,6 +1,8 @@
 """
 基于规则的policy
 """
+import sys
+sys.path.append('../..')
 from data.DataBase.Ontology import *
 from data.DataManager import DataManager
 import copy
@@ -106,7 +108,6 @@ class RulePolicy:
                     self.offer = item
                     break
         else: self.offer = None
-
         if self.UsrAct == "告知":
             if self.offer != None:
                 SysAct = {'offer': self.offer,
@@ -181,10 +182,12 @@ class RulePolicy:
                 self.compared_entities = [self.KB_pointer, CurrrentDialogState["OfferedResult"]["preprev_turn"]]
             else: # 最后是个人业务
                 self.compared_entities = CurrrentDialogState["UserPersonal"]["已购业务"]
-            SysAct = {'offer': self.compared_entities,
+            SysAct = {'offer_comp': self.compared_entities,
+            # 比较这里的offer是entity的list，和offer不同，定义成一个新的sysact: offer_comp
                       'inform': ["套餐内容"],
                       'reqmore': None,
                       'domain':self.domain}  # 把这几个业务都介绍一下
+                      # zyc: 这里inform定死为套餐内容，但实际可能只对比流量或者通话时长之类的
             return SysAct
         elif self.UsrAct == "要求更多" or self.UsrAct == "要求更少":
             # 此用户动作仅限以下slot
@@ -195,7 +198,7 @@ class RulePolicy:
                 self.new_offer = Ask_more_or_less(required_slots, self.KB_results, self.KB_pointer, self.UsrAct)
                 # new_offer 可能是None， 如果没有更多或者更少的了
                 SysAct = {'offer': self.new_offer,
-                          'inform': '产品介绍',
+                          'inform': ['产品介绍'],
                           'domain': self.domain}
                 return SysAct
         elif self.UsrAct == "更换":
@@ -207,10 +210,10 @@ class RulePolicy:
             else:
                 self.new_offer = None
             SysAct = {'offer': self.new_offer, # TODO 是否换 offer 这个标签，亦驰可以根据 NLG 的实现来定
-                      'inform': '产品介绍',
+                      'inform': ['产品介绍'],
                       'domain': self.domain}
             return SysAct
-        elif self.UsrAct == "问询费用选项" or self.UsrAct == "问询通话时长选项" or self.UsrAct == "问询流量选项":
+        elif self.UsrAct == "问询说明":
             SysAct = {'offerhelp':None,
                       'domain': self.domain} # 回复问询说明
             return SysAct
@@ -220,7 +223,7 @@ class RulePolicy:
             return SysAct
         elif self.UsrAct == "同时办理":
             SysAct = {'offer': self.ER ,
-                      'inform': '互斥业务',
+                      'inform': ['互斥业务'],
                       'domain': self.domain}
             return SysAct
         else:
@@ -233,7 +236,3 @@ if __name__ == '__main__':
     import pprint
     rule_policy = RulePolicy()
     pprint.pprint(rule_policy.Reply(DialogStateSample))
-
-
-
-
