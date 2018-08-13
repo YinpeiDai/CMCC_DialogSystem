@@ -107,7 +107,6 @@ class DomainModel:
                 self.tvars = tf.get_collection(key=tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name)
                 self.optimizer = tf.train.AdamOptimizer(self.lr)
                 self.l2_loss = [tf.nn.l2_loss(v) for v in self.tvars]
-                print(self.loss)
                 self.unbalance_loss = self.loss
                 self.final_loss = tf.reduce_mean(self.loss)*(1-self.LSR) + 1/7*self.LSR
                 # tf.reduce_mean(self.loss) + 0.001 * tf.add_n(self.l2_loss)

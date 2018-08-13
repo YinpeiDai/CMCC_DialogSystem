@@ -2,13 +2,15 @@
 给定本轮用户输入，上一轮系统动作，输出
 领域检测、业务实体、（情感检测）、槽值对、问询槽、用户动作
 """
+import sys
+sys.path.append('..')
 import tensorflow as tf
 from NLU.DomDect.DomainDection import DomainDetector
 from NLU.ER.EntityRecogition import EntityDetector
 from NLU.SentiDect.SentimentDection import SentimentDetector
 from NLU.UserAct.UserAction import UserActDetector
 from NLU.SlotFilling.DialogState import SlotFillingDetector
-# from NLU.SlotFilling import *** 具体接口还没设定
+
 
 save_path_dict = {
     'domain': './DomDect/model/ckpt',

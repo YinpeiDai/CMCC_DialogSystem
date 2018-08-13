@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../../..')
+
 import tensorflow as tf
 import numpy as np
 import copy, pprint, os
@@ -169,7 +172,7 @@ def train_informable(data_tmp_path):
     informable_slot_datasets, requestable_slot_datasets = generate_dataset(data_manager.DialogData)
 
     print('载入 informable slot detector ...')
-    init_learning_rate = 0.01
+    init_learning_rate = 0.005
     informable_batch_ratios = { # 不同slot 的minibatch ratio
         "通话时长": [2, 8, 8, 8],
         "流量": [4, 8, 8, 8],
@@ -220,9 +223,9 @@ def train_informable(data_tmp_path):
                     if best_accu < accu:
                         best_accu = accu
                         tolerance_count = 0
-                        # if not os.path.exists("./ckpt/informable/"):
-                        #     os.makedirs("./ckpt/informable/")
-                        # saver.save(sess, "./ckpt/informable/model.ckpt")
+                        if not os.path.exists("./ckpt/informable/"):
+                            os.makedirs("./ckpt/informable/")
+                        saver.save(sess, "./ckpt/informable/model.ckpt")
                     if tolerance_count == tolerance:
                         break
                     print("%s, step % 4d, loss %0.4f, accu %0.4f" % (slot, step, average_loss, accu))
@@ -246,7 +249,7 @@ def train_requestable(data_tmp_path):
     informable_slot_datasets, requestable_slot_datasets = generate_dataset(data_manager.DialogData)
 
     print('载入 requestable slot detector...')
-    init_learning_rate = 0.01
+    init_learning_rate = 0.005
     graph = tf.Graph()
     with graph.as_default():
         requestable_slots_models = {}
@@ -257,7 +260,7 @@ def train_requestable(data_tmp_path):
             allow_soft_placement=True)) as sess:
         sess.run(tf.group(tf.global_variables_initializer()))
         saver = tf.train.Saver()
-        saver.restore(sess, "./ckpt/requestable/model.ckpt")
+        # saver.restore(sess, "./ckpt/requestable/model.ckpt")
         # 训练 requestable slots
         requestable_slots_F1s = {}
         for slot, model in requestable_slots_models.items():
@@ -292,9 +295,9 @@ def train_requestable(data_tmp_path):
                     if best_F1 < F1:
                         best_F1 = F1
                         tolerance_count = 0
-                        # if not os.path.exists("./ckpt/requestable/"):
-                        #     os.makedirs("./ckpt/requestable/")
-                        # saver.save(sess, "./ckpt/requestable/model.ckpt")
+                        if not os.path.exists("./ckpt/requestable/"):
+                            os.makedirs("./ckpt/requestable/")
+                        saver.save(sess, "./ckpt/requestable/model.ckpt")
                     if tolerance_count == tolerance:
                         break
                     print("%s, step % 4d, loss %0.4f, F1 %0.4f, accu %0.4f" % (slot, step, average_loss, F1, accu))
@@ -309,5 +312,6 @@ def train_requestable(data_tmp_path):
 
 
 if __name__ == '__main__':
-    train_informable('../../../data/tmp')
+    # train_informable('../../../data/tmp')
+    # tf.reset_default_graph()
     train_requestable('../../../data/tmp')

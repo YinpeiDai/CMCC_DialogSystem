@@ -4,9 +4,21 @@
 import sys
 sys.path.append('..')
 from data.DataManager import DataManager
-
+from data.DataBase.Ontology import *
 
 import random
+
+
+special_slot_mapping = {
+    "超出处理_国内主叫": "国内主叫超出处理规则",
+    "超出处理_国内流量": "国内流量超出处理规则",
+    "结转规则_国内主叫":"国内主叫结转规则",
+    "结转规则_国内流量":"国内流量结转规则",
+    "结转规则_赠送流量": "赠送流量结转规则",
+    "停机销号管理": "停机销号管理规则"
+}
+
+
 
 def period_handler(nl, nl_to_add):
     if len(nl) == 0 :
@@ -15,7 +27,7 @@ def period_handler(nl, nl_to_add):
 
     if nl[-1] in ['，', '、', '/'] :
         nl = nl[:-1]+'。'+nl_to_add
-    elif nl[-1] in [ '。', '？', '\n']:
+    elif nl[-1] in [ '。', '？', '\n', '；']:
         nl += nl_to_add
     else:
         nl += '。'+nl_to_add
@@ -28,51 +40,61 @@ def rule_based_NLG(SysAct):
     def inform_template(content, offered_entity=None):
         nl = ''
         # 'inform' 的content为一个requestable slot组成的list
-        prev_req_slot = []
-        for req_slot in content:
-            value = offered_entity[req_slot]
-            if value == None: value = '无'
+        if offered_entity is None:
+            for req_slot in content:
+                if req_slot in special_slot_mapping:
+                    nl += '该套餐的' + special_slot_mapping[req_slot] + '为：'
+                    nl += GLOBAL_slots[req_slot] + '；'
+                elif '是否' in req_slot:
+                    nl += '该套餐' + req_slot + '：' + GLOBAL_slots[req_slot] + '；'
+                else:
+                    nl += '该套餐的' + req_slot + '为：' + GLOBAL_slots[req_slot] + '；'
+            nl = period_handler(nl, '') + '\n'
+        else:
+            prev_req_slot = []
+            for req_slot in content:
+                value = offered_entity[req_slot]
+                if value == None: value = '无'
 
-            if req_slot == '产品介绍':
-                value = offered_entity['产品介绍']
-                nl += value if '：' in value else '产品介绍：'+value
-                nl += '\n' if nl[-1] == '。' else '。\n'
-            elif '_' in req_slot:
-                if '套餐内容' in req_slot:
-                    if not '套餐内容' in prev_req_slot:
-                        nl = period_handler(nl, '该套餐包括')
-                    nl += req_slot[5:]
-                    if '时长' in req_slot or '主叫' in req_slot:
-                        value = 0 if value=='无' else value
-                        nl += str(value) + '分钟，'
-                    elif '流量' in req_slot:
-                        value = 0 if value=='无' else value
-                        nl += str(value) + 'MB，' #TODO: MB,GB的转换
-                    elif '彩信' in req_slot or '短信' in req_slot:
-                        value = 0 if value=='无' else value
-                        nl += str(value) + '条，'
-                    else:
-                        nl += value+'，'
-                elif '结转规则' in req_slot:
-                    if not '结转规则' in prev_req_slot:
-                        nl = period_handler(nl, '该套餐的')
-                    if value[-1] in ['。', '；']:
-                        nl += req_slot[5:] + '结转规则为' + value
-                    else:
-                        nl += req_slot[5:] + '结转规则为' + value + '。'
-                elif '超出处理' in req_slot:
-                    if not '超出处理' in prev_req_slot:
-                        nl = period_handler(nl, '该套餐的')
-                    if value[-1] in ['。', '；']:
-                        nl += req_slot[5:] + '超出处理规则为' + value
-                    else:
-                        nl += req_slot[5:] + '超出处理规则为' + value + '。'
-            elif '否' in req_slot:
-                nl = period_handler(nl, '该套餐' +  req_slot+'：' + value)
-            else:
-                nl = period_handler(nl, '该套餐的' +  req_slot+'为' + value)
-
-            prev_req_slot = req_slot
+                if req_slot == '产品介绍':
+                    value = offered_entity['产品介绍']
+                    nl += value if '：' in value else '产品介绍：'+value
+                    nl += '\n' if nl[-1] == '。' else '。\n'
+                elif '_' in req_slot:
+                    if '套餐内容' in req_slot:
+                        if not '套餐内容' in prev_req_slot:
+                            nl = period_handler(nl, '该套餐包括')
+                        nl += req_slot[5:]
+                        if '时长' in req_slot or '主叫' in req_slot:
+                            value = 0 if value=='无' else value
+                            nl += str(value) + '分钟，'
+                        elif '流量' in req_slot:
+                            value = 0 if value=='无' else value
+                            nl += str(value) + 'MB，' #TODO: MB,GB的转换
+                        elif '彩信' in req_slot or '短信' in req_slot:
+                            value = 0 if value=='无' else value
+                            nl += str(value) + '条，'
+                        else:
+                            nl += value+'，'
+                    elif '结转规则' in req_slot:
+                        if not '结转规则' in prev_req_slot:
+                            nl = period_handler(nl, '该套餐的')
+                        if value[-1] in ['。', '；']:
+                            nl += req_slot[5:] + '结转规则为' + value
+                        else:
+                            nl += req_slot[5:] + '结转规则为' + value + '。'
+                    elif '超出处理' in req_slot:
+                        if not '超出处理' in prev_req_slot:
+                            nl = period_handler(nl, '该套餐的')
+                        if value[-1] in ['。', '；']:
+                            nl += req_slot[5:] + '超出处理规则为' + value
+                        else:
+                            nl += req_slot[5:] + '超出处理规则为' + value + '。'
+                elif '否' in req_slot:
+                    nl = period_handler(nl, '该套餐' +  req_slot+'：' + value)
+                else:
+                    nl = period_handler(nl, '该套餐的' +  req_slot+'为' + value)
+                prev_req_slot = req_slot
 
         return nl
 
@@ -156,15 +178,33 @@ def rule_based_NLG(SysAct):
             nl = period_handler(nl, '') + '\n'
         return nl
     if 'offer' in SysAct.keys():
-        if SysAct['offer'] is not None:
-            strategy = random.choice([0,1,2])
-            if strategy == 0:
-                nl += '已为您找到业务：'+SysAct['offer']['子业务']
-            elif strategy == 1:
-                nl += '符合您要求的业务是：'+SysAct['offer']['子业务']
-            elif strategy == 2:
-                nl += SysAct['offer']['子业务']+'符合您的需求。'
-            nl = period_handler(nl, '') + '\n'
+        entity = SysAct['offer']
+        if entity is not None:
+            if isinstance(entity, dict) or (isinstance(entity, list) and len(entity)==1):
+                if isinstance(entity, list): entity == entity[0]
+                strategy = random.choice([0,1,2])
+                if strategy == 0:
+                    nl += '已为您找到业务：'+entity['子业务']
+                elif strategy == 1:
+                    nl += '符合您要求的业务是：'+entity['子业务']
+                elif strategy == 2:
+                    nl += entity['子业务']+'符合您的需求。'
+                nl = period_handler(nl, '') + '\n'
+                # 一个entity， 不return，等下面处理inform，request等act
+            elif isinstance(entity, list):
+                # 多个entity，一般为用户在查询，即inform的情况
+                # 遍历sys act后return
+                if 'inform' in SysAct.keys():
+                    for req_slot in SysAct['inform']:
+                        nl += req_slot + '：\n'
+                        for idx, entity in enumerate(compared_entities):
+                            nl += str(idx+1) + '. ' + entity['子业务'] + '：'
+                            nl += inform_template([req_slot], offered_entity=entity)
+                            nl = period_handler(nl, '') + '\n'
+                if 'reqmore' in SysAct.keys():
+                    nl += reqmore_template()
+                    nl = period_handler(nl, '') + '\n'
+                return nl
         else:
             nl += '没有找到符合您要求的业务，请尝试放松条件。'
             # TODO: 根据不同的user act，设置不同的sys act，以获得更独特的自然语言回复

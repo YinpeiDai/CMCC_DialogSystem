@@ -1,12 +1,13 @@
 """
 结合所有的 Manager,实现text-in text-out的交互式 agent 的接口
 """
-
+import os,sys
 from DM.DST.StateTracking import DialogStateTracker
 from DM.policy.RuleMapping import RulePolicy
 from data.DataManager import DataManager
 from NLU.NLUManager import NLUManager
 from NLG.NLGManager import *
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 UserPersonal =  {
             "已购业务": ["180元档幸福流量年包", "18元4G飞享套餐升级版"], # 这里应该是完整的业务的信息dict
@@ -48,8 +49,13 @@ class DialogAgent:
             user_utter = input("用户输入：")
             nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
             self.dst.update(nlu_results, self.rule_policy, self.data_manager)
+
+            print('\n')
+            self.dst.dialog_state_print()
+            print('\n')
+
             reply  = rule_based_NLG(self.dst.DialogState['SystemAct']['curr_turn'])
-            print(reply)
+            print('系统:', reply)
             self.dialog_history.append({"系统":reply, "用户":user_utter})
             self.turn_num += 1
 
@@ -61,29 +67,6 @@ if __name__ == '__main__':
 
 
 
-            # print('\n\nprint DST:')
-            # for k,v in self.dst.DialogState.items():
-            #     if k == 'OfferedResult':
-            #         print(k)
-            #         if '子业务' in v['prev_turn'] :
-            #             print(v['prev_turn']['子业务'])
-            #         if '子业务' in v['curr_turn']:
-            #             print(v['curr_turn']['子业务'])
-            #     elif k == 'QueryResults':
-            #         print(k)
-            #         for ent in v:
-            #             print(ent['子业务'])
-            #     else:
-            #         if k=='SystemAct':
-            #             print(k)
-            #             for kk,vv in v.items():
-            #                 if kk == 'offer':
-            #                     pass
-            #                 else:
-            #                     print(kk,vv)
-            #         else:
-            #             print(k,v)
-            # print('\n\n')
 
 
 

@@ -87,6 +87,8 @@ class DialogStateTracker:
         for key,value in self.DialogState.items():
             if isinstance(value,dict) and 'prev_turn' in value.keys():
                 value['prev_turn'] = copy.deepcopy(value['curr_turn'])
+
+        # 利用本轮NLU结果更新当前轮的dialog state
         self.DialogState['RequestedSlot']['curr_turn'] = NLU_results['requestable']
         self.DialogState['DetectedDomain']['curr_turn'] =NLU_results['domain'][0]
         self.DialogState['UserAct']['curr_turn'] = NLU_results['useract'][0]
@@ -94,28 +96,36 @@ class DialogStateTracker:
             self.DialogState['BeliefState']['curr_turn'][slot] = value
         # TODO: sentiment
         # self.detected_sentiment = ?
-        # 利用本轮NLU结果更新当前轮的dialog state
+        self.DialogState['EntityMentioned']['curr_turn']= []
         if NLU_results['entity']:
-            self.DialogState['EntityMentioned']['curr_turn'] = NLU_results['entity']
             QueryResults = []
             for entity_name in NLU_results['entity']:
                 if entity_name in main_bussiness_dict:
                     for table in DB_tables:
-                        QueryResults += data_manager.SearchingByEntity(
+                        ent = data_manager.SearchingByEntity(
                             table=table, feed_dict={'主业务':entity_name})
+                        QueryResults += ent
+                        self.DialogState['EntityMentioned']['curr_turn'] += ent
                 elif entity_name in card_dict:
-                    QueryResults += data_manager.SearchingByEntity(
+                    ent += data_manager.SearchingByEntity(
                         table='Card', feed_dict={'号卡':entity_name})
+                    QueryResults += ent
+                    self.DialogState['EntityMentioned']['curr_turn'] += ent
                 else:
                     for table in DB_tables:
-                        QueryResults += data_manager.SearchingByEntity(
+                        ent = data_manager.SearchingByEntity(
                             table=table, feed_dict={'子业务':entity_name})
+                        QueryResults += ent
+                        self.DialogState['EntityMentioned']['curr_turn'] += ent
         else:
             QueryResults = data_manager.SearchingByConstraints(
                 table=self.DialogState['DetectedDomain']['curr_turn'],
                 feed_dict=self.DialogState['BeliefState']['curr_turn'])
         self.DialogState['QueryResults'] = QueryResults
-        self.DialogState['OfferedResult']['curr_turn'] = QueryResults[0]
+        if QueryResults:
+            self.DialogState['OfferedResult']['curr_turn'] = QueryResults[0]
+        else:
+            self.DialogState['OfferedResult']['curr_turn'] = {}
 
 
         #self.DialogState['UserPersenal'] = self.UserPersenal  #个人信息不变
@@ -130,7 +140,95 @@ class DialogStateTracker:
             if isinstance(value, dict) and 'prev_turn' in value.keys():
                 if value['prev_turn'] != value['curr_turn']:
                     self.isDSTChange = True
-        pass
+
+    def dialog_state_print(self):
+        # dialog state printer
+        def print_entity(self, dst_key_name):
+            temp = ' - ' + dst_key_name + '\n'
+            for turn in ['prev_turn', 'curr_turn']:
+                entity = self.DialogState[dst_key_name][turn]
+                temp += '   '+turn+': '
+                if isinstance(entity, list):
+                    for ent in entity:
+                        if '子业务' in ent and '子业务' is not None:
+                            temp += str(ent['子业务']) + ', '
+                        elif '主业务' in ent and '主业务' is not None:
+                            temp +=str(ent['主业务']) + ', '
+                        else:
+                            temp += 'None, '
+                    temp = temp[:-2] + '\n'
+                elif isinstance(entity, dict):
+                    ent = entity
+                    if '子业务' in ent and '子业务' is not None:
+                        temp += str(ent['子业务']) + '\n'
+                    elif '主业务' in ent and '主业务' is not None:
+                        temp +=str(ent['主业务']) + '\n'
+                    else:
+                        temp += 'None, '
+                else:
+                    raise ValueError('invalid entity type')
+            return temp
+
+        def print_QR(self):
+            QR = self.DialogState['QueryResults']
+            temp = ' - QueryResults\n'
+            for ent in QR:
+                if isinstance(ent, dict):
+                    if '子业务' in ent and '子业务' is not None:
+                        temp += '   '+str(ent['子业务']) + '\n'
+                    elif '主业务' in ent and '主业务' is not None:
+                        temp += '   '+str(ent['主业务']) + '\n'
+            return temp
+
+        def print_NLU(self, dst_key_name):
+            temp = ' - ' + dst_key_name + '\n'
+            for turn in ['prev_turn', 'curr_turn']:
+                result = self.DialogState[dst_key_name][turn]
+                temp += '   '+turn+': ' + str(result) + '\n'
+            return temp
+
+        def print_sysact(self):
+            SysAct = self.DialogState['SystemAct']
+            temp = ' - SystemAct\n'
+            for turn in ['prev_turn', 'curr_turn']:
+                temp += '   '+turn+': \n'
+                for sysact, content in SysAct[turn].items():
+                    temp += '      '+sysact+'  '
+                    if sysact == 'offer':
+                        if isinstance(content, dict):
+                            if '子业务' in content and '子业务' is not None:
+                                temp += str(content['子业务']) + '\n'
+                            elif '主业务' in content and '主业务' is not None:
+                                temp +=str(content['主业务']) + '\n'
+                        else:
+                            temp += 'None\n'
+                    elif sysact == 'offer_comp':
+                        for ent in content:
+                            if isinstance(ent, dict):
+                                if '子业务' in ent and '子业务' is not None:
+                                    temp += str(ent['子业务']) + ', '
+                                elif '主业务' in ent and '主业务' is not None:
+                                    temp +=str(ent['主业务']) + ', '
+                            else:
+                                temp += 'None, '
+                        temp = temp[:-2] + '\n'
+                    else:
+                        temp += str(content)+'\n'
+            return temp
+
+        print('Dialog State in turn %d:' %self.DialogState['TurnNum'])
+        print(print_entity(self, 'EntityMentioned'))
+        print(print_QR(self))
+        print(print_entity(self, 'OfferedResult'))
+        print(print_NLU(self, 'DetectedDomain'))
+        print(print_NLU(self, 'UserAct'))
+        print(print_NLU(self, 'RequestedSlot'))
+        print(print_NLU(self, 'BeliefState'))
+        print(print_sysact(self))
+        print(' - isDSTChange:' + str(self.isDSTChange) + '\n')
+        print(' - isUtterSame:' + str(self.isUtterSame) + '\n')
+
+
 
 
 if __name__ == '__main__':
@@ -155,33 +253,18 @@ if __name__ == '__main__':
     'sentiment':None,
     'userutter': 'hhhhhhhh'
     }
+    NLU_results3 = {
+    'domain': ('套餐', 0.19),
+    'useract': ('比较',  0.44),
+    'informable': {"功能费": [100, 150]},
+    'requestable': ['套餐内容'],
+    'entity': ['88元畅享套餐', '288元畅享套餐'],
+    'sentiment':None,
+    'userutter': 'hhhhhhhh'
+    }
     dst.update(NLU_results, rule_policy, data_manager)
-    for k,v in dst.DialogState.items():
-        if k == 'OfferedResult':
-            print(k)
-            if '子业务' in v['prev_turn'] :
-                print(v['prev_turn']['子业务'])
-            if '子业务' in v['curr_turn']:
-                print(v['curr_turn']['子业务'])
-        elif k == 'QueryResults':
-            print(k)
-            for ent in v:
-                print(ent['子业务'])
-        else:
-            print(k,v)
-    print('\n\n\n')
+    dst.dialog_state_print()
     dst.update(NLU_results2, rule_policy, data_manager)
-    # print(dst.DialogState)
-    for k,v in dst.DialogState.items():
-        if k == 'OfferedResult':
-            print(k)
-            if '子业务' in v['prev_turn'] :
-                print(v['prev_turn']['子业务'])
-            if '子业务' in v['curr_turn']:
-                print(v['curr_turn']['子业务'])
-        elif k == 'QueryResults':
-            print(k)
-            for ent in v:
-                print(ent['子业务'])
-        else:
-            print(k,v)
+    dst.dialog_state_print()
+    dst.update(NLU_results3, rule_policy, data_manager)
+    dst.dialog_state_print()

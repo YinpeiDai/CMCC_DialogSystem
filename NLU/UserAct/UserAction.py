@@ -9,6 +9,7 @@ import tensorflow as tf
 
 class UserActDetector:
     def __init__(self, model_path):
+        print('载入 UserActDetector 模型...')
         self.tf_graph = tf.Graph()
         with self.tf_graph.as_default():
             self.model = UserActModel("UserActDect")

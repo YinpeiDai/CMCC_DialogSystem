@@ -178,8 +178,8 @@ class RulePolicy:
             if len(CurrrentDialogState["EntityMentioned"]["curr_turn"]) > 1:
                 self.compared_entities = CurrrentDialogState["EntityMentioned"]["curr_turn"]
             # 再考虑对话系统提供的业务实体集
-            elif self.KB_pointer != CurrrentDialogState["OfferedResult"]["preprev_turn"]:
-                self.compared_entities = [self.KB_pointer, CurrrentDialogState["OfferedResult"]["preprev_turn"]]
+            elif self.KB_pointer != CurrrentDialogState["OfferedResult"]["prev_turn"]:
+                self.compared_entities = [self.KB_pointer, CurrrentDialogState["OfferedResult"]["prev_turn"]]
             else: # 最后是个人业务
                 self.compared_entities = CurrrentDialogState["UserPersonal"]["已购业务"]
             SysAct = {'offer_comp': self.compared_entities,
