@@ -37,7 +37,10 @@ class SlotFillingDetector:
                 "流量": InformableSlotDector('data'),
                 "通话时长": InformableSlotDector('time'),
             }
-            self.informable_sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+            self.informable_tf_config = tf.ConfigProto()
+            self.informable_tf_config.gpu_options.allow_growth = True
+            self.informable_tf_config.allow_soft_placement = True
+            self.informable_sess = tf.Session(config=self.informable_tf_config)
             self.informable_sess.run(tf.global_variables_initializer())
             self.informable_saver = tf.train.Saver()
             self.informable_saver.restore(self.informable_sess, save_path + "/informable/model.ckpt")
@@ -47,8 +50,10 @@ class SlotFillingDetector:
             self.requestable_slots_models = {}
             for k, v in All_requestable_slots_order.items():
                 self.requestable_slots_models[k] = RequestableSlotDector(str(v))
-            self.requestable_sess = tf.Session(graph=self.requestable_graph,
-                                               config=tf.ConfigProto(allow_soft_placement=True))
+            self.requestable_tf_config = tf.ConfigProto()
+            self.requestable_tf_config.gpu_options.allow_growth = True
+            self.requestable_tf_config.allow_soft_placement = True
+            self.requestable_sess = tf.Session(config=self.requestable_tf_config)
             self.requestable_sess.run(tf.global_variables_initializer())
             self.requestable_saver = tf.train.Saver()
             self.requestable_saver.restore(self.requestable_sess, save_path + "/requestable/model.ckpt")

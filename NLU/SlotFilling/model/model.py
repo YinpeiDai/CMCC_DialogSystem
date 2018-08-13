@@ -158,7 +158,7 @@ class RequestableSlotDector:
             with tf.variable_scope("projection"):
                 self.final_output_logits = tf.layers.dense(inputs=self.feature,
                                                     units=2,
-                                                    activation=tf.nn.relu)
+                                                    activation=tf.nn.tanh)
 
             with tf.variable_scope("loss"):
                 self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
