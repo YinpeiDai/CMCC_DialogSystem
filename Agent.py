@@ -45,19 +45,24 @@ class DialogAgent:
 
     def run(self):
         last_DA = None   # ?
-        while True:
-            user_utter = input("用户输入：")
-            nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
-            self.dst.update(nlu_results, self.rule_policy, self.data_manager)
+        try:
+            while True:
+                user_utter = input("用户输入：")
+                nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
+                self.dst.update(nlu_results, self.rule_policy, self.data_manager)
 
-            print('\n')
-            self.dst.dialog_state_print()
-            print('\n')
+                print('\n')
+                self.dst.dialog_state_print()
+                print('\n')
 
-            reply  = rule_based_NLG(self.dst.DialogState['SystemAct']['curr_turn'])
-            print('系统:', reply)
-            self.dialog_history.append({"系统":reply, "用户":user_utter})
-            self.turn_num += 1
+                reply  = rule_based_NLG(self.dst)
+                print('系统:', reply)
+                self.dialog_history.append({"系统":reply, "用户":user_utter})
+                self.turn_num += 1
+
+        except KeyboardInterrupt:
+            self.nlu_manager.close()
+            print('\n系统: 感谢您的使用，再见！')
 
 if __name__ == '__main__':
     agent = DialogAgent()

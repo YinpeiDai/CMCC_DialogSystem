@@ -5,10 +5,12 @@ informable slots 主要有 "功能费","套餐内容_国内主叫","套餐内容
 """
 import sys
 sys.path.append('../..')
+import os
+import numpy as np
 
 import tensorflow as tf
-import numpy as np
-import os
+import tensorflow.contrib.slim as slim
+
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 from NLU.SlotFilling.model.model import InformableSlotDector, RequestableSlotDector
 from data.DataManager import DataManager
@@ -42,7 +44,8 @@ class SlotFillingDetector:
             self.informable_tf_config.allow_soft_placement = True
             self.informable_sess = tf.Session(config=self.informable_tf_config)
             self.informable_sess.run(tf.global_variables_initializer())
-            self.informable_saver = tf.train.Saver()
+            var_to_restore = [val  for val in tf.global_variables() if 'Adam' not in val.name]
+            self.informable_saver = tf.train.Saver(var_to_restore)
             self.informable_saver.restore(self.informable_sess, save_path + "/informable/model.ckpt")
 
         self.requestable_graph = tf.Graph()
@@ -55,7 +58,8 @@ class SlotFillingDetector:
             self.requestable_tf_config.allow_soft_placement = True
             self.requestable_sess = tf.Session(config=self.requestable_tf_config)
             self.requestable_sess.run(tf.global_variables_initializer())
-            self.requestable_saver = tf.train.Saver()
+            var_to_restore = [val  for val in tf.global_variables() if 'Adam' not in val.name]
+            self.requestable_saver = tf.train.Saver(var_to_restore)
             self.requestable_saver.restore(self.requestable_sess, save_path + "/requestable/model.ckpt")
 
 

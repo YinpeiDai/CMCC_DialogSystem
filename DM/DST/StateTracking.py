@@ -70,7 +70,8 @@ class DialogStateTracker:
         }
         # status variables
         self.isDSTChange = True
-        self.isUtterSame = False
+        self.isOfferedEntityChange = True
+        self.isUtterChange = True
         self.detected_sentiment = None
         self.user_utter = None
 
@@ -125,21 +126,26 @@ class DialogStateTracker:
         if QueryResults:
             self.DialogState['OfferedResult']['curr_turn'] = QueryResults[0]
         else:
-            self.DialogState['OfferedResult']['curr_turn'] = {}
+            self.DialogState['OfferedResult']['curr_turn'] = \
+            self.DialogState['OfferedResult']['prev_turn']
 
 
         #self.DialogState['UserPersenal'] = self.UserPersenal  #个人信息不变
 
         # 最后更新system act
         self.DialogState['SystemAct']['curr_turn'] = rule_policy.Reply(self.DialogState)
+        if self.DialogState['SystemAct']['curr_turn'] == None:
+            self.DialogState['SystemAct']['curr_turn'] = self.DialogState['SystemAct']['prev_turn']
 
         # 一些判断，暂时没用
-        self.isUtterSame = True if self.user_utter == NLU_results['userutter'] else False
+        self.isUtterChange = True if self.user_utter == NLU_results['userutter'] else False
         self.isDSTChange = False
         for key,value in self.DialogState.items():
             if isinstance(value, dict) and 'prev_turn' in value.keys():
                 if value['prev_turn'] != value['curr_turn']:
                     self.isDSTChange = True
+        self.isOfferedEntityChange = False if self.DialogState['OfferedResult']['curr_turn'] == \
+           self.DialogState['OfferedResult']['prev_turn'] else True
 
     def dialog_state_print(self):
         # dialog state printer
@@ -164,7 +170,7 @@ class DialogStateTracker:
                     elif '主业务' in ent and '主业务' is not None:
                         temp +=str(ent['主业务']) + '\n'
                     else:
-                        temp += 'None, '
+                        temp += 'None\n'
                 else:
                     raise ValueError('invalid entity type')
             return temp
@@ -190,6 +196,7 @@ class DialogStateTracker:
         def print_sysact(self):
             SysAct = self.DialogState['SystemAct']
             temp = ' - SystemAct\n'
+            # print(SysAct)
             for turn in ['prev_turn', 'curr_turn']:
                 temp += '   '+turn+': \n'
                 for sysact, content in SysAct[turn].items():
@@ -226,7 +233,8 @@ class DialogStateTracker:
         print(print_NLU(self, 'BeliefState'))
         print(print_sysact(self))
         print(' - isDSTChange:' + str(self.isDSTChange) + '\n')
-        print(' - isUtterSame:' + str(self.isUtterSame) + '\n')
+        print(' - isUtterChange:' + str(self.isUtterChange) + '\n')
+        print(' - isOfferedEntityChange:' + str(self.isOfferedEntityChange) + '\n')
 
 
 
@@ -249,7 +257,7 @@ if __name__ == '__main__':
     'useract': ('问询',  0.89),
     'informable': {"功能费": [100, 400]},
     'requestable': ['套餐内容'],
-    'entity': ['88元畅享套餐'],
+    'entity': [],
     'sentiment':None,
     'userutter': 'hhhhhhhh'
     }
