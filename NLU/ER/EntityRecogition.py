@@ -18,6 +18,7 @@ class EntityDetector:
         :param user_utter: 输入语句
         :return: tuple
         """
+        self.entity_detected = []
         for entity in self.entity_list:
             if entity in user_utter:
                 self.entity_detected.append(entity)

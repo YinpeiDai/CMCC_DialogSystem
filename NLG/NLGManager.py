@@ -36,11 +36,12 @@ def period_handler(nl, nl_to_add):
 
 
 
-def rule_based_NLG(SysAct):
-    def inform_template(content, offered_entity=None):
+def rule_based_NLG(DST):
+    def inform_template(content, offered_entity = None):
         nl = ''
         # 'inform' 的content为一个requestable slot组成的list
         if offered_entity is None:
+            # 用户动作为request但未提供业务实体，返回“普适”的slots？
             for req_slot in content:
                 if req_slot in special_slot_mapping:
                     nl += '该套餐的' + special_slot_mapping[req_slot] + '为：'
@@ -53,7 +54,9 @@ def rule_based_NLG(SysAct):
         else:
             prev_req_slot = []
             for req_slot in content:
-                value = offered_entity[req_slot]
+                if req_slot in offered_entity.keys():
+                    value = offered_entity[req_slot]
+                else: continue
                 if value == None: value = '无'
 
                 if req_slot == '产品介绍':
@@ -156,6 +159,7 @@ def rule_based_NLG(SysAct):
             nl += '您还要查询该套餐的其他信息吗？'
         return nl
 
+    SysAct = DST.DialogState['SystemAct']['curr_turn']
     nl = ''
     offered_entity = SysAct['offer'] if 'offer' in SysAct.keys() else None
     compared_entities = SysAct['offer_comp'] if 'offer_comp' in SysAct.keys() else None
@@ -171,7 +175,7 @@ def rule_based_NLG(SysAct):
                 nl += req_slot + '：\n'
                 for idx, entity in enumerate(compared_entities):
                     nl += str(idx+1) + '. ' + entity['子业务'] + '：'
-                    nl += inform_template([req_slot], offered_entity=entity)
+                    nl += inform_template([req_slot], offered_entity = entity)
                     nl = period_handler(nl, '') + '\n'
         if 'reqmore' in SysAct.keys():
             nl += reqmore_template()
@@ -180,31 +184,35 @@ def rule_based_NLG(SysAct):
     if 'offer' in SysAct.keys():
         entity = SysAct['offer']
         if entity is not None:
-            if isinstance(entity, dict) or (isinstance(entity, list) and len(entity)==1):
-                if isinstance(entity, list): entity == entity[0]
-                strategy = random.choice([0,1,2])
-                if strategy == 0:
-                    nl += '已为您找到业务：'+entity['子业务']
-                elif strategy == 1:
-                    nl += '符合您要求的业务是：'+entity['子业务']
-                elif strategy == 2:
-                    nl += entity['子业务']+'符合您的需求。'
-                nl = period_handler(nl, '') + '\n'
-                # 一个entity， 不return，等下面处理inform，request等act
-            elif isinstance(entity, list):
-                # 多个entity，一般为用户在查询，即inform的情况
-                # 遍历sys act后return
-                if 'inform' in SysAct.keys():
-                    for req_slot in SysAct['inform']:
-                        nl += req_slot + '：\n'
-                        for idx, entity in enumerate(compared_entities):
-                            nl += str(idx+1) + '. ' + entity['子业务'] + '：'
-                            nl += inform_template([req_slot], offered_entity=entity)
-                            nl = period_handler(nl, '') + '\n'
-                if 'reqmore' in SysAct.keys():
-                    nl += reqmore_template()
+            if DST.isOfferedEntityChange:
+                if isinstance(entity, dict) or (isinstance(entity, list) and len(entity)==1):
+                    if isinstance(entity, list): entity = entity[0]
+                    strategy = random.choice([0,1,2])
+                    if strategy == 0:
+                        nl += '已为您找到业务：'+entity['子业务']
+                    elif strategy == 1:
+                        nl += '为您推荐：'+entity['子业务']
+                    elif strategy == 2:
+                        nl += entity['子业务']+'应该可以满足您的需求'
                     nl = period_handler(nl, '') + '\n'
-                return nl
+                    # 一个entity， 不return，等下面处理inform，request等act
+                elif isinstance(entity, list):
+                    # 多个entity，一般为用户在查询，即inform的情况
+                    # 遍历sys act后return
+                    if 'inform' in SysAct.keys():
+                        for req_slot in SysAct['inform']:
+                            nl += req_slot + '：\n'
+                            for idx, entity in enumerate(compared_entities):
+                                nl += str(idx+1) + '. ' + entity['子业务'] + '：'
+                                nl += inform_template([req_slot], offered_entity =entity)
+                                nl = period_handler(nl, '') + '\n'
+                    if 'reqmore' in SysAct.keys():
+                        nl += reqmore_template()
+                        nl = period_handler(nl, '') + '\n'
+                    return nl
+            else:
+                # 用户问询的对象没变，继续下面的内容
+                pass
         else:
             nl += '没有找到符合您要求的业务，请尝试放松条件。'
             # TODO: 根据不同的user act，设置不同的sys act，以获得更独特的自然语言回复
@@ -212,7 +220,13 @@ def rule_based_NLG(SysAct):
             #        UsrAct == "要求更多"，回复“没有流量更多的套餐了”
             return nl
     if 'inform' in SysAct.keys():
-        nl += inform_template(SysAct['inform'], offered_entity=offered_entity)
+        if isinstance(offered_entity, dict) or offered_entity is None:
+            nl += inform_template(SysAct['inform'],offered_entity = offered_entity)
+        elif isinstance(offered_entity, list):
+            if len(offered_entity) == 1:
+                nl += inform_template(SysAct['inform'],offered_entity = offered_entity[0])
+            else:
+                return '不应该出现这种情况，有bug'
         nl = period_handler(nl, '') + '\n'
     if 'request' in SysAct.keys():
         nl += request_template(SysAct['request'])
