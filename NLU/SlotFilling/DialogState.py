@@ -111,7 +111,7 @@ class SlotFillingDetector:
                                         model.char_emb_matrix: char_emb_matrix,
                                         model.word_emb_matrix: word_emb_matrix,
                                     })
-            bad_slots = ["订购时间","互斥业务", "封顶规则"] # 差结果，不要，反正不影响
+            bad_slots = [] # 差结果，不要，反正不影响
             if predict[0] == 0 and slot not in bad_slots: # 套餐内容_国内短信 slot 结果太差不要了
                 requested_slots.append(slot)
 

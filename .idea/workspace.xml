@@ -7,14 +7,8 @@
     <list default="true" id="4c0146db-5795-46a0-bfef-bbeea21b548f" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/DialogState.py" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/DialogState.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/checkpoint" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/checkpoint" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.data-00000-of-00001" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.data-00000-of-00001" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.index" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.index" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.meta" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/model/ckpt/requestable/model.ckpt.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NLU/SlotFilling/model/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/NLU/SlotFilling/model/model.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,76 +16,85 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$Informable_templates.coverage" NAME="Informable_templates Coverage Results" MODIFIED="1531517033814" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$input_data.coverage" NAME="input_data Coverage Results" MODIFIED="1531514722592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$DataManager.coverage" NAME="DataManager Coverage Results" MODIFIED="1533918663011" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$RuleMapping.coverage" NAME="RuleMapping Coverage Results" MODIFIED="1532289555268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DM/policy" />
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$train.coverage" NAME="train Coverage Results" MODIFIED="1534157893191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$NLUManager.coverage" NAME="NLUManager Coverage Results" MODIFIED="1534156659438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$DialogState.coverage" NAME="DialogState Coverage Results" MODIFIED="1534159833621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling" />
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$generate_dict.coverage" NAME="generate_dict Coverage Results" MODIFIED="1531305203286" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/WordDict" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$Agent.coverage" NAME="Agent Coverage Results" MODIFIED="1534156831532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$model.coverage" NAME="model Coverage Results" MODIFIED="1532272157037" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$train__1_.coverage" NAME="train (1) Coverage Results" MODIFIED="1531516196458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$StateTracking.coverage" NAME="StateTracking Coverage Results" MODIFIED="1533918594989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DM/DST" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$DialogState.coverage" NAME="DialogState Coverage Results" MODIFIED="1534159437748" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$Operation.coverage" NAME="Operation Coverage Results" MODIFIED="1533920618420" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/DataBase" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$WordSegUtils.coverage" NAME="WordSegUtils Coverage Results" MODIFIED="1531301471468" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/WordSeg" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$NLUManager.coverage" NAME="NLUManager Coverage Results" MODIFIED="1534156659438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU" />
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$ErrorHandler.coverage" NAME="ErrorHandler Coverage Results" MODIFIED="1532287366666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DM/policy" />
     <SUITE FILE_PATH="coverage/CMCC_DialogSystem$preprocess20180613.coverage" NAME="preprocess20180613 Coverage Results" MODIFIED="1531240938463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/DialogData" />
-    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$Agent.coverage" NAME="Agent Coverage Results" MODIFIED="1534156831532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$StateTracking.coverage" NAME="StateTracking Coverage Results" MODIFIED="1533918594989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DM/DST" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$Operation.coverage" NAME="Operation Coverage Results" MODIFIED="1533920618420" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/DataBase" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$input_data.coverage" NAME="input_data Coverage Results" MODIFIED="1531514722592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$train__1_.coverage" NAME="train (1) Coverage Results" MODIFIED="1531516196458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NLU/SlotFilling/model" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$WordSegUtils.coverage" NAME="WordSegUtils Coverage Results" MODIFIED="1531301471468" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data/WordSeg" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$DataManager.coverage" NAME="DataManager Coverage Results" MODIFIED="1533918663011" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/CMCC_DialogSystem$RuleMapping.coverage" NAME="RuleMapping Coverage Results" MODIFIED="1532289555268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DM/policy" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1470367461">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="3" />
+          <entry key="project.open.time.7" value="1" />
+          <entry key="project.open.time.9" value="2" />
+          <entry key="project.opened" value="3" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="DialogState.py" pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/DialogState.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="78" column="45" selection-start-line="78" selection-start-column="45" selection-end-line="78" selection-end-column="45" />
-              <folding>
-                <element signature="e#2984#3512#0" />
-              </folding>
+            <state relative-caret-position="3186">
+              <caret line="118" selection-start-line="118" selection-end-line="118" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="train.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/model/train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="47">
-              <caret line="312" selection-start-line="312" selection-end-line="312" />
+            <state relative-caret-position="8505">
+              <caret line="315" column="30" selection-start-line="315" selection-start-column="30" selection-end-line="315" selection-end-column="30" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NLUManager.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NLU/NLUManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="78">
+            <state relative-caret-position="1188">
               <caret line="44" column="37" selection-start-line="44" selection-start-column="37" selection-end-line="44" selection-end-column="37" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Agent.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Agent.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="63" column="15" selection-start-line="63" selection-start-column="15" selection-end-line="63" selection-end-column="15" />
+            <state relative-caret-position="147">
+              <caret line="66" selection-start-line="66" selection-end-line="66" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/model/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
+            <state relative-caret-position="4401">
               <caret line="163" column="55" selection-start-line="163" selection-start-column="54" selection-end-line="163" selection-end-column="55" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DomainDection.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NLU/DomDect/DomainDection.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="128">
+            <state relative-caret-position="486">
               <caret line="18" column="52" selection-start-line="15" selection-start-column="12" selection-end-line="18" selection-end-column="52" />
             </state>
           </provider>
@@ -158,8 +161,8 @@
         <option value="$PROJECT_DIR$/data/DataManager.py" />
         <option value="$PROJECT_DIR$/data/DataBase/Operation.py" />
         <option value="$PROJECT_DIR$/NLU/NLUManager.py" />
-        <option value="$PROJECT_DIR$/NLU/SlotFilling/DialogState.py" />
         <option value="$PROJECT_DIR$/NLU/SlotFilling/model/model.py" />
+        <option value="$PROJECT_DIR$/NLU/SlotFilling/DialogState.py" />
       </list>
     </option>
   </component>
@@ -169,10 +172,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="NodePackageJsonFileManager">
-    <packageJsonPaths />
-  </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="95" />
     <option name="y" value="-9" />
     <option name="width" value="1378" />
@@ -184,6 +184,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -248,7 +249,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -289,6 +289,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="DialogState" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CMCC_DialogSystem" />
@@ -308,6 +311,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="NLUManager" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CMCC_DialogSystem" />
@@ -327,6 +333,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="Operation" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CMCC_DialogSystem" />
@@ -346,6 +355,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="CMCC_DialogSystem" />
@@ -365,6 +377,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.DialogState" />
@@ -398,30 +413,29 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1378" height="738" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.61954623" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20294118" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="SciView" order="3" weight="0.32941177" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21658987" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49926472" weight="0.565445" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39965096" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info active="true" anchor="bottom" id="Event Log" order="10" sideWeight="0.5007353" side_tool="true" visible="true" weight="0.3296501" />
+      <window_info anchor="bottom" id="Version Control" order="11" />
+      <window_info anchor="bottom" id="Messages" order="12" />
+      <window_info anchor="bottom" id="Python Console" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="Messages" order="7" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" weight="0.32941177" />
+      <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -430,82 +444,7 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <option name="time" value="4" />
-    </breakpoint-manager>
-  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/data/DataManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5427">
-          <caret line="201" column="46" lean-forward="true" selection-start-line="201" selection-start-column="46" selection-end-line="201" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/WordDict/char2vec.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2106">
-          <caret line="78" selection-start-line="78" selection-end-line="78" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/WordDict/generate_dict.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="6" column="34" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/DataManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2754">
-          <caret line="113" column="18" lean-forward="true" selection-start-line="113" selection-start-column="18" selection-end-line="113" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/DataBase/Operation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2241">
-          <caret line="95" column="67" selection-start-line="95" selection-start-column="67" selection-end-line="95" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/DataBase/Ontology.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1674">
-          <caret line="62" column="6" lean-forward="true" selection-start-line="62" selection-start-column="6" selection-end-line="62" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/tmp/_del_words.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="11" column="3" selection-start-line="11" selection-start-column="3" selection-end-line="11" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/WordSeg/WordSegmentation.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="21" column="66" lean-forward="true" selection-start-line="21" selection-start-column="34" selection-end-line="21" selection-end-column="66" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/tmp/_add_words.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="15" column="2" selection-start-line="15" selection-start-column="2" selection-end-line="15" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/WordSeg/WordSegUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="729">
-          <caret line="27" column="20" lean-forward="true" selection-start-line="27" selection-start-column="20" selection-end-line="27" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/xlrd/book.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="127">
@@ -710,9 +649,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="79" column="21" selection-start-line="79" selection-start-column="21" selection-end-line="79" selection-end-column="21" />
-          <folding>
-            <element signature="e#20#56#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -720,14 +656,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1539">
           <caret line="395" column="37" selection-start-line="395" selection-start-column="37" selection-end-line="395" selection-end-column="37" />
-          <folding>
-            <element signature="e#34#74#0" expanded="true" />
-            <element signature="e#3098#5103#0" />
-            <element signature="e#5137#7849#0" />
-            <element signature="e#7883#11949#0" />
-            <element signature="e#11983#15938#0" />
-            <element signature="e#15982#16475#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -735,9 +663,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="118">
           <caret line="177" lean-forward="true" selection-start-line="177" selection-end-line="177" />
-          <folding>
-            <element signature="e#331#5287#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -752,9 +677,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="58">
           <caret line="102" column="27" selection-start-line="102" selection-start-column="27" selection-end-line="102" selection-end-column="27" />
-          <folding>
-            <element signature="e#354#1082#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -765,48 +687,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NLU/DomDect/DomainDection.py">
+    <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/DialogState.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128">
-          <caret line="18" column="52" selection-start-line="15" selection-start-column="12" selection-end-line="18" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NLU/NLUManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="78">
-          <caret line="44" column="37" selection-start-line="44" selection-start-column="37" selection-end-line="44" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Agent.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="63" column="15" selection-start-line="63" selection-start-column="15" selection-end-line="63" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/model/model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="163" column="55" selection-start-line="163" selection-start-column="54" selection-end-line="163" selection-end-column="55" />
+        <state relative-caret-position="3186">
+          <caret line="118" selection-start-line="118" selection-end-line="118" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/model/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="47">
-          <caret line="312" selection-start-line="312" selection-end-line="312" />
+        <state relative-caret-position="8505">
+          <caret line="315" column="30" selection-start-line="315" selection-start-column="30" selection-end-line="315" selection-end-column="30" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/DialogState.py">
+    <entry file="file://$PROJECT_DIR$/NLU/NLUManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="78" column="45" selection-start-line="78" selection-start-column="45" selection-end-line="78" selection-end-column="45" />
-          <folding>
-            <element signature="e#2984#3512#0" />
-          </folding>
+        <state relative-caret-position="1188">
+          <caret line="44" column="37" selection-start-line="44" selection-start-column="37" selection-end-line="44" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NLU/SlotFilling/model/model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4401">
+          <caret line="163" column="55" selection-start-line="163" selection-start-column="54" selection-end-line="163" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NLU/DomDect/DomainDection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="18" column="52" selection-start-line="15" selection-start-column="12" selection-end-line="18" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="66" selection-start-line="66" selection-end-line="66" />
         </state>
       </provider>
     </entry>
