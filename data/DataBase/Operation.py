@@ -19,7 +19,7 @@ class DBOperationWrapper:
         文字描述的slots 统一 按“高”“中”“低”搜索
         :param table: 领域表名
         :param feed_dict: 搜索条件
-        :return: 搜索结果
+        :return: 搜索结果（按照流量多少排序）
         """
         if table == "国际港澳台":
             command = """
@@ -71,6 +71,7 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内主叫 <= 400.0")
 
             command += " AND ".join(constraints)
+            command += "\nORDER BY 套餐内容_国内流量 DESC,套餐内容_国内主叫 DESC,套餐内容_国内短信 DESC,套餐内容_国内彩信 DESC"
             try:
                 return_results = [item for item in self.cur.execute(command)]
             except:
@@ -101,6 +102,7 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内流量 <= 400.0")
 
             command += " AND ".join(constraints)
+            command += "\nORDER BY 套餐内容_国内流量 DESC,套餐内容_国内主叫 DESC,套餐内容_国内短信 DESC,套餐内容_国内彩信 DESC"
             try:
                 return_results = [item for item in self.cur.execute(command)]
             except:
