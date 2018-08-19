@@ -1,8 +1,10 @@
 """
 用户动作检测
 """
+import os
 import sys
-sys.path.append('../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 from NLU.UserAct.model.model import *
 from data.DataManager import DataManager
 import tensorflow as tf

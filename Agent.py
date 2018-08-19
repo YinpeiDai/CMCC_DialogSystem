@@ -1,12 +1,15 @@
 """
 结合所有的 Manager,实现text-in text-out的交互式 agent 的接口
 """
-import os,sys
+import os
+import sys
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 from DM.DST.StateTracking import DialogStateTracker
 from DM.policy.RuleMapping import RulePolicy
 from data.DataManager import DataManager
 from NLU.NLUManager import NLUManager
-from NLG.NLGManager import *
+from NLG.NLGManager import rule_based_NLG
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 UserPersonal =  {
@@ -26,18 +29,18 @@ UserPersonal =  {
         }
 
 save_path_dict = {
-    'domain': 'NLU/DomDect/model/ckpt',
-    'useract': 'NLU/UserAct/model/ckpt',
-    'slotfilling': 'NLU/SlotFilling/model/ckpt',
-    'entity': 'NLU/ER/entity_list.txt',
-    'sentiment': 'NLU/SentiDect'
+    'domain': os.path.join(BASE_DIR, 'NLU/DomDect/model/ckpt'),
+    'useract': os.path.join(BASE_DIR, 'NLU/UserAct/model/ckpt'),
+    'slotfilling': os.path.join(BASE_DIR, 'NLU/SlotFilling/model/ckpt'),
+    'entity': os.path.join(BASE_DIR, 'NLU/ER/entity_list.txt'),
+    'sentiment': os.path.join(BASE_DIR, 'NLU/SentiDect')
 }
 
 class DialogAgent:
     def __init__(self):
         self.rule_policy = RulePolicy()
         self.dst = DialogStateTracker(UserPersonal)
-        self.data_manager = DataManager('data/tmp')
+        self.data_manager = DataManager(os.path.join(BASE_DIR, 'data/tmp'))
         self.nlu_manager = NLUManager(save_path_dict)
         # self.nlg_template = NLG_template
         self.turn_num = 0

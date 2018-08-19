@@ -4,14 +4,9 @@
 3. 个人信息返回
 """
 import sys
-sys.path.append('..')
-
-from data.WordDict.generate_dict import DictGenerator
-from data.WordDict.word2vec import NCE_word2vec
-from data.WordDict.char2vec import NCE_char2vec
-from data.WordSeg.WordSegmentation import WordSegWrapper
-from data.DataBase.Operation import DBOperationWrapper
-from data.DataBase.Ontology import *  # 提供 Ontology,需要预先写好
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '..'))
 
 
 import tensorflow as tf
@@ -20,6 +15,13 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import numpy as np
 from pylab import *
+
+from data.WordDict.generate_dict import DictGenerator
+from data.WordDict.word2vec import NCE_word2vec
+from data.WordDict.char2vec import NCE_char2vec
+from data.WordSeg.WordSegmentation import WordSegWrapper
+from data.DataBase.Operation import DBOperationWrapper
+from data.DataBase.Ontology import *  # 提供 Ontology,需要预先写好
 
 # 处理中文字体在 matplotlib 乱码的问题
 mpl.rcParams['font.sans-serif'] = ['SimHei']

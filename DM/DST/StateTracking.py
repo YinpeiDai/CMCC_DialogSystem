@@ -7,9 +7,11 @@
 是否 DST 不变、是否用户重复表述同一句话、情感检测结果
 
 """
+import os
 import sys
-sys.path.append('../..')
 import copy
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 # from collections import deque
 from NLU.NLUManager import *
 from DM.policy.RuleMapping import *
@@ -123,12 +125,6 @@ class DialogStateTracker:
                 table=self.DialogState['DetectedDomain']['curr_turn'],
                 feed_dict=self.DialogState['BeliefState']['curr_turn'])
         self.DialogState['QueryResults'] = QueryResults
-        if QueryResults:
-            self.DialogState['OfferedResult']['curr_turn'] = QueryResults[0]
-        else:
-            self.DialogState['OfferedResult']['curr_turn'] = \
-            self.DialogState['OfferedResult']['prev_turn']
-
 
         #self.DialogState['UserPersenal'] = self.UserPersenal  #个人信息不变
 
@@ -137,8 +133,15 @@ class DialogStateTracker:
         if self.DialogState['SystemAct']['curr_turn'] == None:
             self.DialogState['SystemAct']['curr_turn'] = self.DialogState['SystemAct']['prev_turn']
 
-        # 一些判断，暂时没用
-        self.isUtterChange = True if self.user_utter == NLU_results['userutter'] else False
+        if 'offer' in self.DialogState['SystemAct']['curr_turn'].keys():
+            self.DialogState['OfferedResult']['curr_turn'] = \
+            self.DialogState['SystemAct']['curr_turn']['offer']
+        else:
+            self.DialogState['OfferedResult']['curr_turn'] = \
+            self.DialogState['OfferedResult']['prev_turn']
+
+        # 状态判断量的更新
+        self.isUtterChange = False if self.user_utter == NLU_results['userutter'] else True
         self.isDSTChange = False
         for key,value in self.DialogState.items():
             if isinstance(value, dict) and 'prev_turn' in value.keys():

@@ -205,9 +205,3 @@ if __name__ == '__main__':
                                               max_sent_length=30,
                                               word_embed_size=20,
                                               char_embed_size=20)
-
-
-
-
-
-

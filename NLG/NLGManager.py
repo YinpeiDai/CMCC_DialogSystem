@@ -1,12 +1,15 @@
 """
 自然语言生成，系统动作到语句的映射
 """
+import os
 import sys
-sys.path.append('..')
-from data.DataManager import DataManager
-from data.DataBase.Ontology import *
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 
 import random
+
+from data.DataManager import DataManager
+from data.DataBase.Ontology import *
 
 
 special_slot_mapping = {
@@ -45,12 +48,12 @@ def rule_based_NLG(DST):
             for req_slot in content:
                 if req_slot in special_slot_mapping:
                     nl += '该套餐的' + special_slot_mapping[req_slot] + '为：'
-                    nl += GLOBAL_slots[req_slot] + '；'
+                    nl += GLOBAL_slots[req_slot]
                 elif '是否' in req_slot:
-                    nl += '该套餐' + req_slot + '：' + GLOBAL_slots[req_slot] + '；'
+                    nl += '该套餐' + req_slot + '：' + GLOBAL_slots[req_slot]
                 else:
-                    nl += '该套餐的' + req_slot + '为：' + GLOBAL_slots[req_slot] + '；'
-            nl = period_handler(nl, '') + '\n'
+                    nl += '该套餐的' + req_slot + '为：' + GLOBAL_slots[req_slot]
+                nl = period_handler(nl, '') + '\n'
         else:
             prev_req_slot = []
             for req_slot in content:

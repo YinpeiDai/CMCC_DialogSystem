@@ -1,8 +1,11 @@
 """
 基于规则的policy
 """
+import os
 import sys
-sys.path.append('../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
+
 from data.DataBase.Ontology import *
 from data.DataManager import DataManager
 import copy
@@ -100,7 +103,8 @@ class RulePolicy:
         self.KB_results = copy.deepcopy(CurrrentDialogState["QueryResults"])
         self.KB_pointer = copy.deepcopy(CurrrentDialogState["OfferedResult"]["prev_turn"])
 
-        if len(self.ER) > 0: self.offer = self.ER # 业务实体优先填充
+        if len(self.ER) > 0:
+            self.offer = self.ER # 业务实体优先填充
         # 如果 belief_states 更新了，KB_resluts 也找到了，拿第一个填充
         elif len(self.KB_results) > 0 and self.IsInformableSlotChanged:
             for item in self.KB_results:

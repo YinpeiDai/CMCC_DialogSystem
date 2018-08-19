@@ -1,7 +1,9 @@
+import os
 import sys
-sys.path.append('../../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../../..'))
 import tensorflow as tf
-import copy, pprint, os
+import copy, pprint
 from data.DataManager import DataManager
 from NLU.UserAct.model.input_data import *
 from NLU.UserAct.model.model import *
