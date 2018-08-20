@@ -102,7 +102,7 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内流量 <= 400.0")
 
             command += " AND ".join(constraints)
-            command += "\nORDER BY 套餐内容_国内流量 DESC,套餐内容_国内主叫 DESC,套餐内容_国内短信 DESC,套餐内容_国内彩信 DESC"
+            command += "\nORDER BY 套餐内容_国内流量 DESC"
             try:
                 return_results = [item for item in self.cur.execute(command)]
             except:
@@ -171,9 +171,9 @@ class DBOperationWrapper:
 
 if __name__ == '__main__':
     operation = DBOperationWrapper('../tmp/CMCC_NewDB.db')
-    # for ii in operation.SearchingByConstraints("WLAN", {"功能费": [0, 150]}):
-    #     print(dict(zip(Overseas_DB_slots, ii)))
+    for ii in operation.SearchingByConstraints("流量", {"功能费": [0, 150]}):
+        print(dict(zip(Overseas_DB_slots, ii)))
 
-    for ii in operation.SearchingByEntity("套餐", {"子业务": "88元畅享套餐"}):
-        print(ii)
+    # for ii in operation.SearchingByEntity("套餐", {"子业务": "88元畅享套餐"}):
+    #     print(ii)
 
