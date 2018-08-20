@@ -3,14 +3,20 @@
 """
 import os
 import sys
+import argparse
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '../..'))
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 from DM.DST.StateTracking import DialogStateTracker
 from DM.policy.RuleMapping import RulePolicy
 from data.DataManager import DataManager
 from NLU.NLUManager import NLUManager
 from NLG.NLGManager import rule_based_NLG
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--print', type=bool, default=False, help='print details')
+FLAGS= parser.parse_args()
 
 UserPersonal =  {
             "已购业务": ["180元档幸福流量年包", "18元4G飞享套餐升级版"], # 这里应该是完整的业务的信息dict
@@ -39,7 +45,7 @@ save_path_dict = {
 class DialogAgent:
     def __init__(self):
         self.rule_policy = RulePolicy()
-        self.dst = DialogStateTracker(UserPersonal)
+        self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
         self.data_manager = DataManager(os.path.join(BASE_DIR, 'data/tmp'))
         self.nlu_manager = NLUManager(save_path_dict)
         # self.nlg_template = NLG_template
@@ -52,17 +58,12 @@ class DialogAgent:
                 user_utter = input("用户输入：")
 
                 if user_utter == 'restart':
-                    self.dst = DialogStateTracker(UserPersonal)
+                    self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
                     print('对话状态已重置')
                     continue
 
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
-
-                print('\n')
-                self.dst.dialog_state_print()
-                print('\n')
-
                 reply  = rule_based_NLG(self.dst)
                 print('系统:', reply)
                 self.dialog_history.append({"系统":reply, "用户":user_utter})

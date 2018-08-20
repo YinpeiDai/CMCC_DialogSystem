@@ -90,7 +90,6 @@ class RulePolicy:
             self.IsInformableSlotChanged = False
         else:
             self.IsInformableSlotChanged = True
-        print(self.IsInformableSlotChanged)
         if ("功能费" in self.informable_slots  or "功能费_文字描述" in self.informable_slots) and "功能费" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("功能费")
         if ("套餐内容_国内主叫" in self.informable_slots or "套餐内容_国内主叫_文字描述" in self.informable_slots)  and "套餐内容_国内主叫" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("套餐内容_国内主叫")
         if ("套餐内容_国内流量" in self.informable_slots or "套餐内容_国内流量_文字描述" in self.informable_slots)  and "套餐内容_国内流量" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("套餐内容_国内流量")
@@ -104,8 +103,11 @@ class RulePolicy:
         self.KB_results = copy.deepcopy(CurrrentDialogState["QueryResults"])
         self.KB_pointer = copy.deepcopy(CurrrentDialogState["OfferedResult"]["prev_turn"])
 
-        if len(self.ER) > 0:
-            self.offer = self.ER # 业务实体优先填充
+        if len(self.ER) == 1:
+            self.offer = self.ER[0] # 业务实体优先填充
+        elif len(self.ER) > 1:
+            print('提到多个实体，又不是比较的情况, 还没想好怎么办！')
+            exit()
         # 如果 belief_states 更新了，KB_resluts 也找到了，拿第一个填充
         elif len(self.KB_results) > 0:
         # and self.IsInformableSlotChanged:
@@ -115,7 +117,6 @@ class RulePolicy:
                     break
         else:
             self.offer = None
-            print("!!!\n\n")
         if self.UsrAct == "告知":
             if self.offer != None:
                 SysAct = {'offer': self.offer,
@@ -220,6 +221,7 @@ class RulePolicy:
                           'domain': self.domain}
                 return SysAct
         elif self.UsrAct == "更换":
+            # print("dislike results num: ", str(len(self.DislikeResults)))
             self.DislikeResults.append(self.KB_pointer)
             for item in self.KB_results:
                 if item not in self.DislikeResults:

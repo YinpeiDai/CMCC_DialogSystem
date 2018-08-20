@@ -295,7 +295,7 @@ if __name__ == '__main__':
 
     # 测试 DataManager
     data_manager = DataManager('./tmp')
-    for ii in data_manager.SearchingByConstraints('流量', {"功能费": [0, 100]}):
+    for ii in data_manager.SearchingByConstraints('套餐', {"套餐内容_国内流量_文字描述": '高'}):
         # print(ii)
         print(ii['子业务'])
     # for ii in data_manager.SearchingByEntity("套餐", {"子业务": '88元畅享套餐'}):
