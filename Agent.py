@@ -48,6 +48,12 @@ class DialogAgent:
         try:
             while True:
                 user_utter = input("用户输入：")
+                if user_utter == "重来":
+                    self.dst = DialogStateTracker(UserPersonal)
+                    self.turn_num = 0
+                    self.dialog_history = []
+                    print(" === 重新开始 ===")
+                    continue
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
 

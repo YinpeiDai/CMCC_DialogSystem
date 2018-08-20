@@ -83,14 +83,26 @@ class RulePolicy:
         """
         # 根据 BeliefState 更新 未提及的 informable slots
         self.informable_slots = CurrrentDialogState["BeliefState"]["curr_turn"]
-        if CurrrentDialogState["BeliefState"]["curr_turn"] == CurrrentDialogState["BeliefState"]["prev_turn"]:
+        if CurrrentDialogState["BeliefState"]["curr_turn"] ==\
+                CurrrentDialogState["BeliefState"]["prev_turn"]:
             self.IsInformableSlotChanged = False
         else:
             self.IsInformableSlotChanged = True
-        if ("功能费" in self.informable_slots  or "功能费_文字描述" in self.informable_slots) and "功能费" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("功能费")
-        if ("套餐内容_国内主叫" in self.informable_slots or "套餐内容_国内主叫_文字描述" in self.informable_slots)  and "套餐内容_国内主叫" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("套餐内容_国内主叫")
-        if ("套餐内容_国内流量" in self.informable_slots or "套餐内容_国内流量_文字描述" in self.informable_slots)  and "套餐内容_国内流量" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("套餐内容_国内流量")
-        if "开通方向" in self.informable_slots and "开通方向" in self.not_mentioned_informable_slots: self.not_mentioned_informable_slots.remove("开通方向")
+        if ("功能费" in self.informable_slots  or
+            "功能费_文字描述" in self.informable_slots) and \
+                "功能费" in self.not_mentioned_informable_slots:
+            self.not_mentioned_informable_slots.remove("功能费")
+        if ("套餐内容_国内主叫" in self.informable_slots
+            or "套餐内容_国内主叫_文字描述" in self.informable_slots)  and\
+                "套餐内容_国内主叫" in self.not_mentioned_informable_slots:
+            self.not_mentioned_informable_slots.remove("套餐内容_国内主叫")
+        if ("套餐内容_国内流量" in self.informable_slots or
+            "套餐内容_国内流量_文字描述" in self.informable_slots)  and\
+                "套餐内容_国内流量" in self.not_mentioned_informable_slots:
+            self.not_mentioned_informable_slots.remove("套餐内容_国内流量")
+        if "开通方向" in self.informable_slots and \
+                "开通方向" in self.not_mentioned_informable_slots:
+            self.not_mentioned_informable_slots.remove("开通方向")
 
         self.domain = CurrrentDialogState["DetectedDomain"]["curr_turn"]
         self.UsrAct = CurrrentDialogState['UserAct']['curr_turn']

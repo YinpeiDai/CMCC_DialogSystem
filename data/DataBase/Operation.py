@@ -49,11 +49,11 @@ class DBOperationWrapper:
                     constraints.append("%s >= %f AND %s <= %f" % (slot, feed_dict[slot][0], slot, feed_dict[slot][1]))
             if "功能费_文字描述" in feed_dict:
                 if feed_dict["功能费_文字描述"] == "高":
-                    constraints.append("功能费 >= 300.0 ")
+                    constraints.append("功能费 >= 200.0 ")
                 elif feed_dict["功能费_文字描述"] == "中":
-                    constraints.append("功能费 >= 100.0 AND 功能费 < 300.0")
+                    constraints.append("功能费 >= 50.0 AND 功能费 < 200.0")
                 else:
-                    constraints.append("功能费 < 100.0")
+                    constraints.append("功能费 < 50.0")
             if "套餐内容_国内流量_文字描述" in feed_dict:
                 if feed_dict["套餐内容_国内流量_文字描述"] == "高":
                     constraints.append("套餐内容_国内流量 >= 1500.0 ")
