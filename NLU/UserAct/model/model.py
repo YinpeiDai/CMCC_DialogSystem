@@ -86,7 +86,7 @@ class UserActModel:
             #         training=self.is_training)
             with tf.variable_scope("projection"):
                 self.final_output_logits = tf.layers.dense(inputs=self.feature ,
-                                                    units=13,
+                                                    units=9,
                                                     activation=tf.nn.relu)
 
                 # print(self.final_output_logits.get_shape())

@@ -1,11 +1,12 @@
+import os
 import sys
-sys.path.append('../../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../../..'))
 from data.DataManager import DataManager
 import random, copy, pprint
 
 user_acts = [
-    '问询', '告知', '要求更多', '要求更少', '更换', '问询说明', '话题=WLAN', '话题=号卡', '话题=套餐流量', '话题=资源分享',
-    '同时办理', '比较', '闲聊'
+    '问询', '告知', '要求更多', '要求更少', '更换', '问询说明', '同时办理', '比较', '闲聊'
 ]
 user_act_data_ids = {
     '问询': ['id11', 'id97', 'id128', 'id116', 'id114', 'id76', 'id94', 'id103', 'id88', 'id137',
@@ -22,10 +23,6 @@ user_act_data_ids = {
       'id56', 'id42', 'id40', 'id144'],
     '更换': ['id33', 'id32', 'id31'],
     '同时办理': ['id123', 'id122', 'id121'],
-    '话题=套餐流量': ['id119'],
-    '话题=号卡': ['id118'],
-    '话题=WLAN': ['id117'],
-    '话题=资源分享': ['id120'],
     '比较': ['id147'],
     '要求更多': ['id20', 'id21', 'id19', 'id23', 'id22', 'id24'],
     '要求更少': ['id30', 'id29', 'id27', 'id28', 'id25', 'id26'],
@@ -36,58 +33,18 @@ user_act_data_ids = {
     # '问询说明': ['id43', 'id38', 'id68', 'id48', ],
 }
 
-
-'''
-task count:
-问询费用选项, count:1
-问询流量选项, count:2
-问询, count:86
-告知, count:39
-更换, count:3
-同时办理, count:3
-话题=套餐流量, count:1
-比较, count:1
-话题=号卡, count:1
-话题=WLAN, count:1
-话题=资源分享, count:1
-要求更少, count:6
-问询通话时长选项, count:1
-闲聊, count:1
-要求更多, count:6
-'''
-
 class UserActDataset:
     def __init__(self, user_act_data_dicts):
         """
-        产生训练数据一个 minibatch size 为 40，
-        个人：套餐：流量：WLAN：号卡：国际港澳台：家庭多终端 =
-        5：17：5：2：1：5：5
-        :param high_data: 对应标签是 高 的数据
-        :param medium_data: 对应标签是 中 的数据
-        :param low_data: 对应标签是 低 的数据
-        :param none_data: 对应标签是 无 的数据
         """
         self.data = user_act_data_dicts
 
-        # self.batch_size = {
-        #     '个人': 5,
-        #     '套餐': 17,
-        #     '流量': 5,
-        #     'WLAN': 2,
-        #     '号卡': 1,
-        #     '国际港澳台': 5,
-        #     '家庭多终端': 5,
-        # }
         self.batch_size = {
             '问询': 30,
             '告知': 20,
             '问询说明': 10,
             '更换': 10,
             '同时办理': 10,
-            '话题=套餐流量': 10,
-            '话题=号卡': 10,
-            '话题=WLAN': 10,
-            '话题=资源分享': 10,
             '比较': 10,
             '要求更多': 10,
             '要求更少': 10,
@@ -189,14 +146,11 @@ def generate_user_act_dataset(DialogData, user_act_data_ids):
 
 
 if __name__ == '__main__':
-    data_manager = DataManager('../../../data/tmp')
+    data_manager = DataManager(os.path.join(BASE_DIR, '../../../data/tmp'))
     user_act_dataset = generate_user_act_dataset(
         data_manager.DialogData,  user_act_data_ids)
     for user_act, data in user_act_dataset.data.items():
         print(user_act)
         print(len(data))
-    # binput,boutput = domain_dataset.next_batch()
-    # pprint.pprint(domain_dataset.next_batch())
-    # binput,boutput = domain_dataset.next_batch()
-    # pprint.pprint(domain_dataset.next_batch())
+
 

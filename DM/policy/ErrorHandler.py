@@ -2,6 +2,11 @@
 容错处理
 输入未处理的对话状态、输出经过容错检错处理的对话状态
 """
+import os
+import sys
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
+
 from data.DataBase.Ontology import *
 #
 

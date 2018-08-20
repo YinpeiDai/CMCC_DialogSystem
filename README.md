@@ -24,3 +24,9 @@
 │          └─ckpt
 └─NLG 				自然语言生成
 ```
+
+
+运行：
+在主目录下运行命令 python Agent.py --print=<whether to print details or not>
+输入restrat可重置dialog state
+

@@ -1,8 +1,14 @@
 """
 数值描述型的informable slots 预测
 """
+import os
+import sys
+import re
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
+
 from data.DataManager import DataManager
-import os, re
+
 Num_re = re.compile(r"(?P<thousand>[一二两三四五六七八九]+千)?"
                     r"(?P<hundred>[一二两三四五六七八九]+百)?零?"
                     r"(?P<ten>[一二三四五六七八九]+十)?零?"

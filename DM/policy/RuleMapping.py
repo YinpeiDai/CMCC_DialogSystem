@@ -1,8 +1,11 @@
 """
 基于规则的policy
 """
+import os
 import sys
-sys.path.append('../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
+
 from data.DataBase.Ontology import *
 from data.DataManager import DataManager
 import copy
@@ -112,14 +115,20 @@ class RulePolicy:
         self.KB_results = copy.deepcopy(CurrrentDialogState["QueryResults"])
         self.KB_pointer = copy.deepcopy(CurrrentDialogState["OfferedResult"]["prev_turn"])
 
-        if len(self.ER) > 0: self.offer = self.ER # 业务实体优先填充
+        if len(self.ER) == 1:
+            self.offer = self.ER[0] # 业务实体优先填充
+        elif len(self.ER) > 1:
+            print('提到多个实体，又不是比较的情况, 还没想好怎么办！')
+            exit()
         # 如果 belief_states 更新了，KB_resluts 也找到了，拿第一个填充
-        elif len(self.KB_results) > 0 and self.IsInformableSlotChanged:
+        elif len(self.KB_results) > 0:
+        # and self.IsInformableSlotChanged:
             for item in self.KB_results:
                 if item not in self.DislikeResults:
                     self.offer = item
                     break
-        else: self.offer = None
+        else:
+            self.offer = None
         if self.UsrAct == "告知":
             if self.offer != None:
                 SysAct = {'offer': self.offer,
@@ -151,39 +160,49 @@ class RulePolicy:
                               'domain': self.domain} # 例如 "想要多少价格的WLAN套餐？"
                     return SysAct
         elif self.UsrAct == "问询":
-            if self.offer != None:
-                if self.domain == "家庭多终端":
-                    if "能否分享" in self.requestable_slots:
-                        self.requestable_slots.remove("能否分享")
-                        self.requestable_slots.add("套餐内容_通话共享规则")
-                        self.requestable_slots.add("套餐内容_短信共享规则")
-                        self.requestable_slots.add("套餐内容_流量共享规则")
-                    if "互斥业务" in self.requestable_slots:
-                        self.requestable_slots.remove("互斥业务")
-                        self.requestable_slots.add("主卡互斥业务")
-                        self.requestable_slots.add("副卡互斥业务")
-                        self.requestable_slots.add("套餐内容_流量共享规则")
-                    if "开通客户限制" in self.requestable_slots:
-                        self.requestable_slots.remove("开通客户限制")
-                        self.requestable_slots.add("主卡开通客户限制")
-                        self.requestable_slots.add("副卡客户限制")
-                        self.requestable_slots.add("主卡套餐限制")
-                        self.requestable_slots.add("其他开通限制")
-                # 对一些 slot 增加一些补充
-                if "限速说明" in self.requestable_slots:
-                    self.requestable_slots.add("封顶说明")
-                if "适用品牌" in self.requestable_slots:
-                    self.requestable_slots.add("互斥业务")
-
-                SysAct = {'offer': self.offer,
-                          'inform': list(self.requestable_slots),
-                          'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
-                return SysAct
+            if self.offer:
+                # 如果本轮有offer的entity，提供该entity的告知结果
+                pass
+            elif self.KB_pointer:
+                # 如果本轮没有offer的entity，提供上一轮的entity的告知结果
+                self.offer = self.KB_pointer
             else:
-                # 只返回具有一定普适性的问询槽
-                SysAct = {'inform': [i for i in self.requestable_slots if i in GLOBAL_slots ],
-                          'domain': self.domain}  # 例如 "***套餐的***是***" 语句要尽量自然
+                # 如果上一轮也没有offer的entity，询问用户在问哪个entity
+                SysAct = {'ask_entity': self.offer,
+                                'domain':self.domain }
                 return SysAct
+            if self.domain == "家庭多终端":
+                if "能否分享" in self.requestable_slots:
+                    self.requestable_slots.remove("能否分享")
+                    self.requestable_slots.add("套餐内容_通话共享规则")
+                    self.requestable_slots.add("套餐内容_短信共享规则")
+                    self.requestable_slots.add("套餐内容_流量共享规则")
+                if "互斥业务" in self.requestable_slots:
+                    self.requestable_slots.remove("互斥业务")
+                    self.requestable_slots.add("主卡互斥业务")
+                    self.requestable_slots.add("副卡互斥业务")
+                    self.requestable_slots.add("套餐内容_流量共享规则")
+                if "开通客户限制" in self.requestable_slots:
+                    self.requestable_slots.remove("开通客户限制")
+                    self.requestable_slots.add("主卡开通客户限制")
+                    self.requestable_slots.add("副卡客户限制")
+                    self.requestable_slots.add("主卡套餐限制")
+                    self.requestable_slots.add("其他开通限制")
+            # 对一些 slot 增加一些补充
+            if "限速说明" in self.requestable_slots:
+                self.requestable_slots.add("封顶说明")
+            if "适用品牌" in self.requestable_slots:
+                self.requestable_slots.add("互斥业务")
+
+            SysAct = {'offer': self.offer,
+                      'inform': list(self.requestable_slots),
+                      'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
+            return SysAct
+            # else:
+            #     # 只返回具有一定普适性的问询槽
+            #     SysAct = {'inform': [i for i in self.requestable_slots if i in GLOBAL_slots ],
+            #               'domain': self.domain}  # 例如 "***套餐的***是***" 语句要尽量自然
+            #     return SysAct
         elif self.UsrAct == "比较":
             # 比较不同的套餐
             # 先考虑用户主动提及集合
@@ -214,6 +233,7 @@ class RulePolicy:
                           'domain': self.domain}
                 return SysAct
         elif self.UsrAct == "更换":
+            # print("dislike results num: ", str(len(self.DislikeResults)))
             self.DislikeResults.append(self.KB_pointer)
             for item in self.KB_results:
                 if item not in self.DislikeResults:

@@ -7,26 +7,30 @@
 是否 DST 不变、是否用户重复表述同一句话、情感检测结果
 
 """
+import os
 import sys
-sys.path.append('../..')
 import copy
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 # from collections import deque
 from NLU.NLUManager import *
 from DM.policy.RuleMapping import *
+from data.DataBase.Ontology import *
 
-main_bussiness_dict = ['畅享套餐', '畅享不限量套餐','88商旅套餐', '4G飞享套餐升级版', '4G短信包',
-                            '短信包套餐', '和4G套餐', '动感地带可选套餐', '神州行可选套餐', '全球通专属数据包',
-                            '4G数据终端资费套餐', '畅游包', ' 数据流量加油包', '夜间流量套餐', '数据流量实体卡',
-                            '流量小时包', '流量日包', '流量季包', '流量半年包', '幸福流量年包', '4G上网卡',
-                            '任我用流量套餐', '月末流量安心包', '流量月末包', '移动数据流量不限流量叠加包',
-                            '流量安心套餐', '假日流量包', '7天手机视频流量包', '手机视频流量包', '地铁流量包',
-                            '任我看视频流量包', 'WLAN标准套餐', 'WLAN流量套餐', 'WLAN校园套餐',
-                            '和家庭分享', '家庭计划', '多终端分享', '和校园', '亲情通',
-                            '国际/港澳台漫游', '多国/大包多天流量包', '港澳台三地畅游包', '数据流量包',
-                            '2018俄罗斯世界杯特惠包', '“海外随心看”日套餐']
+
 card_dict = ['4G包年卡', '4G飞享卡', '4G任我用卡', '4G爱家卡', '8元卡', '万能副卡']
 
 DB_tables = ['套餐', '流量', 'WLAN',  '国际港澳台', '家庭多终端']
+
+Domain_DB_slots_mapping = {
+    "套餐": TaoCan_DB_slots,
+    "流量": LiuLiang_DB_slots,
+    "WLAN": WLAN_DB_slots,
+    "号卡": Card_DB_slots,
+    "国际港澳台": Overseas_DB_slots,
+    "家庭多终端": MultiTerminal_DB_slots,
+    "个人": []
+}
 
 
 DialogStateSample = {
@@ -55,7 +59,7 @@ DialogStateSample = {
 
 
 class DialogStateTracker:
-    def __init__(self, usr_personal):
+    def __init__(self, usr_personal, print_details):
         self.DialogState = {
             'TurnNum': 0,
             'EntityMentioned': {'curr_turn': [],  'prev_turn': []},
@@ -72,8 +76,8 @@ class DialogStateTracker:
         self.isDSTChange = True
         self.isOfferedEntityChange = True
         self.isUtterChange = True
-        self.detected_sentiment = None
         self.user_utter = None
+        self.print_details = print_details
 
     def update(self, NLU_results, rule_policy, data_manager):
         """
@@ -98,6 +102,7 @@ class DialogStateTracker:
         # TODO: sentiment
         # self.detected_sentiment = ?
         self.DialogState['EntityMentioned']['curr_turn']= []
+        print(NLU_results['entity'])
         if NLU_results['entity']:
             QueryResults = []
             for entity_name in NLU_results['entity']:
@@ -108,7 +113,7 @@ class DialogStateTracker:
                         QueryResults += ent
                         self.DialogState['EntityMentioned']['curr_turn'] += ent
                 elif entity_name in card_dict:
-                    ent += data_manager.SearchingByEntity(
+                    ent = data_manager.SearchingByEntity(
                         table='Card', feed_dict={'号卡':entity_name})
                     QueryResults += ent
                     self.DialogState['EntityMentioned']['curr_turn'] += ent
@@ -123,22 +128,26 @@ class DialogStateTracker:
                 table=self.DialogState['DetectedDomain']['curr_turn'],
                 feed_dict=self.DialogState['BeliefState']['curr_turn'])
         self.DialogState['QueryResults'] = QueryResults
-        if QueryResults:
-            self.DialogState['OfferedResult']['curr_turn'] = QueryResults[0]
-        else:
-            self.DialogState['OfferedResult']['curr_turn'] = \
-            self.DialogState['OfferedResult']['prev_turn']
-
 
         #self.DialogState['UserPersenal'] = self.UserPersenal  #个人信息不变
 
         # 最后更新system act
         self.DialogState['SystemAct']['curr_turn'] = rule_policy.Reply(self.DialogState)
         if self.DialogState['SystemAct']['curr_turn'] == None:
-            self.DialogState['SystemAct']['curr_turn'] = self.DialogState['SystemAct']['prev_turn']
+            self.DialogState['SystemAct']['curr_turn'] = {}
 
-        # 一些判断，暂时没用
-        self.isUtterChange = True if self.user_utter == NLU_results['userutter'] else False
+        if 'offer' in self.DialogState['SystemAct']['curr_turn'].keys():
+            self.DialogState['OfferedResult']['curr_turn'] = \
+            self.DialogState['SystemAct']['curr_turn']['offer']
+        else:
+            self.DialogState['OfferedResult']['curr_turn'] = \
+            self.DialogState['OfferedResult']['prev_turn']
+
+        # 过滤掉一些不必要的requested slots
+        self.sysact_filter()
+
+        # 状态判断量的更新
+        self.isUtterChange = False if self.user_utter == NLU_results['userutter'] else True
         self.isDSTChange = False
         for key,value in self.DialogState.items():
             if isinstance(value, dict) and 'prev_turn' in value.keys():
@@ -146,6 +155,10 @@ class DialogStateTracker:
                     self.isDSTChange = True
         self.isOfferedEntityChange = False if self.DialogState['OfferedResult']['curr_turn'] == \
            self.DialogState['OfferedResult']['prev_turn'] else True
+
+        # 打印对话状态
+        if self.print_details:
+            self.dialog_state_print()
 
     def dialog_state_print(self):
         # dialog state printer
@@ -156,21 +169,23 @@ class DialogStateTracker:
                 temp += '   '+turn+': '
                 if isinstance(entity, list):
                     for ent in entity:
-                        if '子业务' in ent and '子业务' is not None:
+                        if '子业务' in ent and ent['子业务'] is not None:
                             temp += str(ent['子业务']) + ', '
-                        elif '主业务' in ent and '主业务' is not None:
+                        elif '主业务' in ent and ent['主业务'] is not None:
                             temp +=str(ent['主业务']) + ', '
                         else:
                             temp += 'None, '
                     temp = temp[:-2] + '\n'
                 elif isinstance(entity, dict):
                     ent = entity
-                    if '子业务' in ent and '子业务' is not None:
+                    if '子业务' in ent and ent['子业务'] is not None:
                         temp += str(ent['子业务']) + '\n'
-                    elif '主业务' in ent and '主业务' is not None:
+                    elif '主业务' in ent and ent['主业务'] is not None:
                         temp +=str(ent['主业务']) + '\n'
                     else:
                         temp += 'None\n'
+                elif entity is None:
+                    temp += 'None\n'
                 else:
                     raise ValueError('invalid entity type')
             return temp
@@ -180,9 +195,9 @@ class DialogStateTracker:
             temp = ' - QueryResults\n'
             for ent in QR:
                 if isinstance(ent, dict):
-                    if '子业务' in ent and '子业务' is not None:
+                    if '子业务' in ent and ent['子业务'] is not None:
                         temp += '   '+str(ent['子业务']) + '\n'
-                    elif '主业务' in ent and '主业务' is not None:
+                    elif '主业务' in ent and ent['主业务'] is not None:
                         temp += '   '+str(ent['主业务']) + '\n'
             return temp
 
@@ -203,18 +218,18 @@ class DialogStateTracker:
                     temp += '      '+sysact+'  '
                     if sysact == 'offer':
                         if isinstance(content, dict):
-                            if '子业务' in content and '子业务' is not None:
+                            if '子业务' in content and content['子业务'] is not None:
                                 temp += str(content['子业务']) + '\n'
-                            elif '主业务' in content and '主业务' is not None:
+                            elif '主业务' in content and content['主业务'] is not None:
                                 temp +=str(content['主业务']) + '\n'
                         else:
                             temp += 'None\n'
                     elif sysact == 'offer_comp':
                         for ent in content:
                             if isinstance(ent, dict):
-                                if '子业务' in ent and '子业务' is not None:
+                                if '子业务' in ent and ent['子业务'] is not None:
                                     temp += str(ent['子业务']) + ', '
-                                elif '主业务' in ent and '主业务' is not None:
+                                elif '主业务' in ent and ent['主业务'] is not None:
                                     temp +=str(ent['主业务']) + ', '
                             else:
                                 temp += 'None, '
@@ -235,6 +250,64 @@ class DialogStateTracker:
         print(' - isDSTChange:' + str(self.isDSTChange) + '\n')
         print(' - isUtterChange:' + str(self.isUtterChange) + '\n')
         print(' - isOfferedEntityChange:' + str(self.isOfferedEntityChange) + '\n')
+
+
+    def sysact_filter(self):
+
+        def domain_filter(req_slots, domain):
+            # 删除非domain的slot
+            # 是否必要：domain detection未必靠谱？
+            domain_slots = Domain_DB_slots_mapping[domain]
+            for slot in req_slots:
+                if slot not in domain_slots:
+                    req_slots.remove(slot)
+                    if self.print_details: print('删去与本领域无关的slot: '+slot+'\n')
+            return req_slots
+
+        def cost_filter(req_slots):
+            # 问询费用，只提供计费方式和功能费中的一个
+            if '功能费' in req_slots and '计费方式' in req_slots:
+                req_slots.remove('功能费')
+                if self.print_details: print('删去功能费，只询问计费方式')
+            elif '功能费' in req_slots:
+                offered_entity = self.DialogState['OfferedResult']['curr_turn']
+                print(offered_entity)
+                if not offered_entity['功能费']:
+                    req_slots.insert(0, '计费方式')
+                    if self.print_details: print('功能费为None，提供计费方式')
+            return req_slots
+
+        def content_filter(req_slots):
+            # 问询套餐内容、超出处理、结转规则时删去子slot
+            if '套餐内容' in req_slots:
+                for slot in req_slots:
+                    if '套餐内容_' in slot:
+                        req_slots.remove(slot)
+                        if self.print_details: print("问询项存在“套餐内容”，移除“%s”" %slot)
+            if '超出处理' in req_slots:
+                for slot in req_slots:
+                    if '超出处理_' in slot: req_slots.remove(slot)
+                    if self.print_details: print("问询项存在“超出处理”，移除“%s”" %slot)
+            if '结转规则' in req_slots:
+                for slot in req_slots:
+                    if '结转规则_' in slot: req_slots.remove(slot)
+                    if self.print_details: print("问询项存在“结转规则”，移除“%s”" %slot)
+            return req_slots
+
+        SysAct = self.DialogState['SystemAct']['curr_turn']
+        domain = self.DialogState['DetectedDomain']['curr_turn']
+        if 'inform' in SysAct.keys():
+            req_slots = SysAct['inform']
+            req_slots = domain_filter(req_slots, domain)
+            req_slots = cost_filter(req_slots)
+            req_slots = content_filter(req_slots)
+
+
+
+
+
+
+
 
 
 

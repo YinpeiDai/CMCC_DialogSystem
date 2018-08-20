@@ -20,9 +20,15 @@ class EntityDetector:
         """
         self.entity_detected = []
         for entity in self.entity_list:
+            # 子业务名经常包括主业务，可以通过
+            # 将主业务放到entity_list的后面解决
+            # 因为在找到子业务时，这个业务就被替换成了ENT
             if entity in user_utter:
-                self.entity_detected.append(entity)
-                user_utter = user_utter.replace(entity,'ENT')
+                if user_utter[user_utter.find(entity)-1].isnumeric():
+                    pass
+                else:
+                    self.entity_detected.append(entity)
+                    user_utter = user_utter.replace(entity,'ENT')
         return (self.entity_detected, user_utter)
 
     def close(self):

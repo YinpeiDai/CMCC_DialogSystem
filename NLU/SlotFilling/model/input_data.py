@@ -1,3 +1,8 @@
+import os
+import sys
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../../..'))
+
 from data.DataManager import DataManager
 import random, copy, pprint
 # random.seed(1234)

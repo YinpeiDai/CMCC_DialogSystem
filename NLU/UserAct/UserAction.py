@@ -1,8 +1,10 @@
 """
 用户动作检测
 """
+import os
 import sys
-sys.path.append('../..')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
 from NLU.UserAct.model.model import *
 from data.DataManager import DataManager
 import tensorflow as tf
@@ -34,9 +36,8 @@ class UserActDetector:
                      and its probability
         TODO: Add last_domain information
         """
-        user_acts = [ '问询', '告知', '要求更多', '要求更少', '更换', '问询说明',
-                             '话题=WLAN', '话题=号卡', '话题=套餐流量', '话题=资源分享',
-                             '同时办理', '比较', '闲聊']
+        user_acts = [ '问询', '告知', '要求更多', '要求更少', '更换', '问询说明', '同时办理',
+                             '比较', '闲聊']
         batch_data = [user_utter]
         char_emb_matrix, word_emb_matrix, _ = data_manager.sent2num(batch_data)
         predict, probs = self.sess.run([self.model.predict,

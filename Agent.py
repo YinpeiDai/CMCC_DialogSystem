@@ -1,13 +1,22 @@
 """
 结合所有的 Manager,实现text-in text-out的交互式 agent 的接口
 """
-import os,sys
+import os
+import sys
+import argparse
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, '../..'))
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 from DM.DST.StateTracking import DialogStateTracker
 from DM.policy.RuleMapping import RulePolicy
 from data.DataManager import DataManager
 from NLU.NLUManager import NLUManager
-from NLG.NLGManager import *
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+from NLG.NLGManager import rule_based_NLG
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--print', type=bool, default=False, help='print details')
+FLAGS= parser.parse_args()
 
 UserPersonal =  {
             "已购业务": ["180元档幸福流量年包", "18元4G飞享套餐升级版"], # 这里应该是完整的业务的信息dict
@@ -26,41 +35,34 @@ UserPersonal =  {
         }
 
 save_path_dict = {
-    'domain': 'NLU/DomDect/model/ckpt',
-    'useract': 'NLU/UserAct/model/ckpt',
-    'slotfilling': 'NLU/SlotFilling/model/ckpt',
-    'entity': 'NLU/ER/entity_list.txt',
-    'sentiment': 'NLU/SentiDect'
+    'domain': os.path.join(BASE_DIR, 'NLU/DomDect/model/ckpt'),
+    'useract': os.path.join(BASE_DIR, 'NLU/UserAct/model/ckpt'),
+    'slotfilling': os.path.join(BASE_DIR, 'NLU/SlotFilling/model/ckpt'),
+    'entity': os.path.join(BASE_DIR, 'NLU/ER/entity_list.txt'),
+    'sentiment': os.path.join(BASE_DIR, 'NLU/SentiDect')
 }
 
 class DialogAgent:
     def __init__(self):
         self.rule_policy = RulePolicy()
-        self.dst = DialogStateTracker(UserPersonal)
-        self.data_manager = DataManager('data/tmp')
+        self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
+        self.data_manager = DataManager(os.path.join(BASE_DIR, 'data/tmp'))
         self.nlu_manager = NLUManager(save_path_dict)
         # self.nlg_template = NLG_template
         self.turn_num = 0
         self.dialog_history = []
 
     def run(self):
-        last_DA = None   # ?
         try:
             while True:
                 user_utter = input("用户输入：")
-                if user_utter == "重来":
-                    self.dst = DialogStateTracker(UserPersonal)
-                    self.turn_num = 0
-                    self.dialog_history = []
-                    print(" === 重新开始 ===")
+                if user_utter == 'restart':
+                    self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
+                    print('对话状态已重置')
                     continue
+
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
-
-                print('\n')
-                self.dst.dialog_state_print()
-                print('\n')
-
                 reply  = rule_based_NLG(self.dst)
                 print('系统:', reply)
                 self.dialog_history.append({"系统":reply, "用户":user_utter})
