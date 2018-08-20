@@ -15,7 +15,7 @@ from NLU.NLUManager import NLUManager
 from NLG.NLGManager import rule_based_NLG
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--print', type=bool, default=False, help='print details')
+parser.add_argument('--print', type=bool, default=True, help='print details')
 FLAGS= parser.parse_args()
 
 UserPersonal =  {
@@ -56,8 +56,9 @@ class DialogAgent:
         try:
             while True:
                 user_utter = input("用户输入：")
-                if user_utter == 'restart':
+                if user_utter == 'restart' or user_utter == '重来' or user_utter == '重新开始':
                     self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
+                    self.rule_policy = RulePolicy()
                     print('对话状态已重置')
                     continue
 

@@ -181,7 +181,7 @@ def Cost_match(user_utter):
                 num_list.append(1e8)
         num_list = sorted(list(set(num_list)))
         if len(num_list) == 1:
-            return max(num_list[0] - 50, 0), num_list[0] + 50
+            return max(num_list[0] - 20, 0), num_list[0] + 20
         elif len(num_list) > 1:
             return num_list[0], num_list[-1]
         else:

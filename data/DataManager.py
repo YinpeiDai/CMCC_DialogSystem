@@ -190,7 +190,9 @@ class DataManager:
             return results
         elif table == "流量":
             for item in self.DBoperation.SearchingByConstraints(table, feed_dict):
-                results.append(dict(zip(LiuLiang_DB_slots, item)))
+                if item[0] not in ["元旦包", "春节包", "清明包", "五一包", "端午包",
+                                       "中秋包", "国庆包"]:
+                    results.append(dict(zip(LiuLiang_DB_slots, item)))
             return results
         elif table == "国际港澳台":
             for item in self.DBoperation.SearchingByConstraints(table, feed_dict):
@@ -296,8 +298,7 @@ if __name__ == '__main__':
     # 测试 DataManager
     data_manager = DataManager('./tmp')
     for ii in data_manager.SearchingByConstraints('流量', {"套餐内容_国内流量_文字描述": '高'}):
-        # print(ii)
-        print(ii['子业务'])
+        print(ii)
     # for ii in data_manager.SearchingByEntity("套餐", {"子业务": '88元畅享套餐'}):
     #     print(ii)
 

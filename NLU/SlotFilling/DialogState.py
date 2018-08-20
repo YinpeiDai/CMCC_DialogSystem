@@ -5,6 +5,7 @@ informable slots 主要有 "功能费","套餐内容_国内主叫","套餐内容
 """
 import os
 import sys
+import re
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '../..'))
 
@@ -73,6 +74,8 @@ class SlotFillingDetector:
                   数值描述 统一 value 是 tuple (下限， 上限)
         """
         results_dict = {}
+        if re.search("(都行|都可以|无所谓|没有要求|均可|并没有|不在意|不在乎|没所谓)", user_utter):
+            return results_dict
         # 给出 informable slots 功能费_文字描述，套餐内容_国内流量_文字描述，套餐内容_国内主叫_文字描述
         discription = ["高","中","低","无"]
         for slot, model in self.informable_slots_models.items():

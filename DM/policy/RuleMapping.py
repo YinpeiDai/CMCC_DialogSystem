@@ -3,6 +3,7 @@
 """
 import os
 import sys
+import random
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '../..'))
 
@@ -47,36 +48,50 @@ DialogStateSample = {
                 'prev_turn': None}
 }
 
-def Ask_more_or_less(required_slots, KB_results, KB_pointer, UsrAct):
-    """
-    根据用户要求，从搜索结果 QueryResults 中找出一个符合要求的
-    :param required_slots:
-    :param KB_results:
-    :param KB_pointer:
-    :param UsrAct:
-    :return:
-    """
-    slot = required_slots[0] # 取第一个排序
-    if len(KB_results) == 0:
-        return None
-    if UsrAct == "要求更多":
-        KB_results.sort(key=lambda x:x[slot],reverse=True)
-        if KB_pointer == KB_results[0]:
-            return None
-        else:
-            return KB_results[0]
-    else:
-        KB_results.sort(key=lambda x: x[slot], reverse=False)
-        if KB_pointer == KB_results[0]:
-            return None
-        else:
-            return KB_results[0]
+
+
+
 
 class RulePolicy:
     def __init__(self):
         self.not_mentioned_informable_slots = \
             ["功能费", "套餐内容_国内流量", "套餐内容_国内主叫", "开通方向"]
         self.DislikeResults = [] # 用户明确说不要某业务，就存到这里
+        self.offer = None
+        # 用于 要求更多 要求更少 时做filter
+
+    def Ask_more_or_less(self, required_slots, KB_results, KB_pointer, UsrAct):
+        """
+        根据用户要求，从搜索结果 QueryResults 中找出一个符合要求的
+        """
+        if UsrAct == "要求更多" and "套餐内容_国内流量" in required_slots:
+            slot = "套餐内容_国内流量"
+        else:
+            slot = "功能费"
+        if len(KB_results) == 0:
+            return None
+        if UsrAct == "要求更多":
+            KB_results.sort(key=lambda x: x[slot], reverse=True)
+            try:
+                idx = KB_results.index(KB_pointer)
+            except:
+                idx = -1
+            while idx >= 0:
+                if KB_pointer[slot] < KB_results[idx][slot] and KB_results[idx] not in self.DislikeResults:
+                    return KB_results[idx]
+                idx -= 1
+            return None
+        else:
+            KB_results.sort(key=lambda x: x[slot], reverse=False)
+            try:
+                idx = KB_results.index(KB_pointer)
+            except:
+                idx = -1
+            while idx >= 0:
+                if KB_pointer[slot] > KB_results[idx][slot] and KB_results[idx] not in self.DislikeResults:
+                    return KB_results[idx]
+                idx -= 1
+            return None
 
     def Reply(self, CurrrentDialogState):
         """
@@ -115,61 +130,109 @@ class RulePolicy:
         self.KB_results = copy.deepcopy(CurrrentDialogState["QueryResults"])
         self.KB_pointer = copy.deepcopy(CurrrentDialogState["OfferedResult"]["prev_turn"])
 
+        for item in self.ER:
+            if item in self.DislikeResults:
+                self.DislikeResults.remove(item)
+        # print("== DislikeResults:", self.DislikeResults)
+
         if len(self.ER) == 1:
-            self.offer = self.ER[0] # 业务实体优先填充
+            self.new_offer = self.ER[0] # 业务实体优先填充
         elif len(self.ER) > 1:
-            print('提到多个实体，又不是比较的情况, 还没想好怎么办！')
-            exit()
-        # 如果 belief_states 更新了，KB_resluts 也找到了，拿第一个填充
-        elif len(self.KB_results) > 0:
+            SysAct = {'sorry': '=== 您一句话提到多个业务实体，又不是比较的情况, 宝宝还没想好怎么回答！\n ==='
+                                 '=== 请输入 restart 重新开始对话 ===',
+                      'domain': self.domain}
+            return SysAct
+        # 如果 belief_states 更新了，KB_resluts 也找到了，任选一个填充
+        elif not self.offer and len(self.KB_results) > 0:
         # and self.IsInformableSlotChanged:
-            for item in self.KB_results:
+            while True:
+                item = random.choice(self.KB_results)
                 if item not in self.DislikeResults:
-                    self.offer = item
+                    self.new_offer = item
+                    break
+        elif len(self.KB_results) > 0 and self.offer not in self.KB_results and self.IsInformableSlotChanged:
+            while True:
+                item = random.choice(self.KB_results)
+                if item not in self.DislikeResults:
+                    self.new_offer = item
                     break
         else:
-            self.offer = None
+            self.new_offer = self.offer
+        # print('=== new_offer:',self.new_offer)
+        # print('=== offer:',self.offer)
+
         if self.UsrAct == "告知":
-            if self.offer != None:
-                SysAct = {'offer': self.offer,
-                          'inform': ["产品介绍"],
-                          'reqmore': None,  # None 是因为 reqmore 没有参数
-                          'domain':self.domain}
-                #  NLG 的实现例如 "***套餐价格... 您有什么需要了解的?"
+            if random.random() > 0.5:
+                # 系统问询一到两个 informable slot
+                if self.domain == "套餐":
+                    if "功能费" in self.not_mentioned_informable_slots:
+                        SysAct = {'request': ["功能费"],
+                                  'domain': self.domain} # 例如 "想要多少钱的套餐，对价位有要求吗？"
+                        return SysAct
+                    if "套餐内容_国内流量" in self.not_mentioned_informable_slots and "套餐内容_国内主叫" in self.not_mentioned_informable_slots:
+                        if random.random() > 0.5:
+                            SysAct = {'request': ["套餐内容_国内流量"],
+                                      'domain': self.domain} # 例如 "想要多少流量的套餐， 一般每月通话多少分钟"
+                            return SysAct
+                        else:
+                            SysAct = {'request': ["套餐内容_国内主叫"],
+                                      'domain': self.domain} # 例如 "想要多少流量的套餐， 一般每月通话多少分钟"
+                            return SysAct
+                elif self.domain == "流量":
+                    if "功能费" in self.not_mentioned_informable_slots:
+                        SysAct = {'request': ["功能费"],
+                                  'domain': self.domain} # 例如 "想要多少钱的套餐，对价位有要求吗？"
+                        return SysAct
+                    if "套餐内容_国内流量" in self.not_mentioned_informable_slots:
+                        SysAct = {'request': ["套餐内容_国内流量"],
+                                  'domain': self.domain} # 例如 "想要多少流量的套餐， 一般每月通话多少分钟"
+                        return SysAct
+                elif self.domain == "国际港澳台":
+                    if "开通方向" in self.not_mentioned_informable_slots:
+                        SysAct = {'request': ["开通方向"],
+                                  'domain': self.domain} # 例如 "请问您是去哪个国家或地区"
+                        return SysAct
+                elif self.domain == "WLAN":
+                    if "功能费" in self.not_mentioned_informable_slots:
+                        SysAct = {'request': ["功能费"],
+                                  'domain': self.domain} # 例如 "想要多少价格的WLAN套餐？"
+                        return SysAct
+
+            if len(self.KB_results) == 0:
+                SysAct = {'sorry': "很抱歉，没有找到符合您要求的业务，您能重新描述您对费用、流量、通话时长的要求吗？",
+                          'clear_DST': True,
+                          'domain': self.domain}
                 return SysAct
 
-            # 系统问询一到两个 informable slot
-            if self.domain == "套餐" or self.domain == "流量":
-                if "功能费" in self.not_mentioned_informable_slots:
-                    SysAct = {'request': ["功能费"],
-                              'domain': self.domain} # 例如 "想要多少钱的套餐，对价位有要求吗？"
-                    return SysAct
-                if "套餐内容_国内流量" in self.not_mentioned_informable_slots and "套餐内容_国内主叫" in self.not_mentioned_informable_slots:
-                    SysAct = {'request': ["套餐内容_国内流量", "套餐内容_国内主叫"],
-                              'domain': self.domain} # 例如 "想要多少流量的套餐， 一般每月通话多少分钟"
-                    # TODO: 在 NLG 中需要判断一下 如果 domain == 流量，就不说 套餐内容_国内主叫
-                    return SysAct
-            elif self.domain == "国际港澳台":
-                if "开通方向" in self.not_mentioned_informable_slots:
-                    SysAct = {'request': ["开通方向"],
-                              'domain': self.domain} # 例如 "请问您是去哪个国家或地区"
-                    return SysAct
-            elif self.domain == "WLAN":
-                if "功能费" in self.not_mentioned_informable_slots:
-                    SysAct = {'request': ["功能费"],
-                              'domain': self.domain} # 例如 "想要多少价格的WLAN套餐？"
-                    return SysAct
+
+            if self.new_offer != None:
+                SysAct = {'offer': self.new_offer,
+                          'inform': ["产品介绍"],
+                          'reqmore': None,  # None 是因为 reqmore 没有参数
+                          'domain': self.domain}
+                #  NLG 的实现例如 "***套餐价格... 您有什么需要了解的?"
+                self.offer = self.new_offer
+                return SysAct
+            else:
+                SysAct = {'sorry': '很抱歉，没有找到符合您要求的业务',
+                          'change_DST_prev_turn': True,
+                          'domain': self.domain}
+                return SysAct
         elif self.UsrAct == "问询":
-            if self.offer:
+            if self.new_offer:
                 # 如果本轮有offer的entity，提供该entity的告知结果
                 pass
             elif self.KB_pointer:
                 # 如果本轮没有offer的entity，提供上一轮的entity的告知结果
-                self.offer = self.KB_pointer
+                self.new_offer = self.KB_pointer
+            elif self.domain == "个人":
+                SysAct = {'inform': list(self.requestable_slots),
+                          'domain': self.domain}  # 例如 "***套餐的***是***" 语句要尽量自然
+                return SysAct
             else:
                 # 如果上一轮也没有offer的entity，询问用户在问哪个entity
-                SysAct = {'ask_entity': self.offer,
-                                'domain':self.domain }
+                SysAct = {'ask_entity': self.new_offer,
+                          'domain':self.domain }
                 return SysAct
             if self.domain == "家庭多终端":
                 if "能否分享" in self.requestable_slots:
@@ -193,11 +256,18 @@ class RulePolicy:
                 self.requestable_slots.add("封顶说明")
             if "适用品牌" in self.requestable_slots:
                 self.requestable_slots.add("互斥业务")
-
-            SysAct = {'offer': self.offer,
-                      'inform': list(self.requestable_slots),
-                      'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
-            return SysAct
+            if self.offer == self.new_offer:
+                SysAct = {'offer': self.new_offer,
+                          'inform': list(self.requestable_slots),
+                          'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
+                return SysAct
+            else:
+                SysAct = {'offer': self.new_offer,
+                          'inform': ["产品介绍"],
+                          'reqmore': None,  # None 是因为 reqmore 没有参数
+                          'domain': self.domain}
+                self.offer = self.new_offer
+                return SysAct
             # else:
             #     # 只返回具有一定普适性的问询槽
             #     SysAct = {'inform': [i for i in self.requestable_slots if i in GLOBAL_slots ],
@@ -220,31 +290,52 @@ class RulePolicy:
                       'domain':self.domain}  # 把这几个业务都介绍一下
                       # zyc: 这里inform定死为套餐内容，但实际可能只对比流量或者通话时长之类的
             return SysAct
-        elif self.UsrAct == "要求更多" or self.UsrAct == "要求更少":
+        elif self.UsrAct == "要求更多" or \
+                self.UsrAct == "要求更少":
             # 此用户动作仅限以下slot
             required_slots = ["功能费", "套餐内容_国内流量", "套餐内容_国内主叫"]
             for i in required_slots:
                 if i not in self.requestable_slots:
                     required_slots.remove(i)
-                self.new_offer = Ask_more_or_less(required_slots, self.KB_results, self.KB_pointer, self.UsrAct)
-                # new_offer 可能是None， 如果没有更多或者更少的了
+            # print('===required_slots',required_slots)
+            self.new_offer = self.Ask_more_or_less(required_slots, self.KB_results, self.KB_pointer, self.UsrAct)
+            # new_offer 可能是None，
+                # 这时需要主动提问用户更改 belief states 范围
+            if self.new_offer == None:
+                if len(self.ER) == 0 and len(required_slots) == 0 :
+                    SysAct = {'sorry': "对不起，您能重新描述您对费用、流量、通话时长的要求吗？",
+                              'clear_DST':True,
+                              'domain': self.domain}
+                    return SysAct
+                else:
+                    SysAct = {'change_DST': (self.UsrAct, required_slots, self.KB_pointer),
+                              'domain': self.domain}
+                    return SysAct
+                    # TODO change_DST，根据 self.UsrAct, required_slots, self.KB_pointer 扩充belief states
+            else:
+                    SysAct = {'offer': self.new_offer,
+                              'inform': ['产品介绍'],
+                              'domain': self.domain}
+                    self.offer = self.new_offer
+                    return SysAct
+        elif self.UsrAct == "更换":
+        # print("dislike results num: ", str(len(self.DislikeResults)))
+            if len(self.KB_results) > 1:
+                self.DislikeResults.append(self.KB_pointer)
+                while True:
+                    item = random.choice(self.KB_results)
+                    if item not in self.DislikeResults:
+                        self.new_offer = item
+                        break
                 SysAct = {'offer': self.new_offer,
                           'inform': ['产品介绍'],
                           'domain': self.domain}
+                self.offer = self.new_offer
                 return SysAct
-        elif self.UsrAct == "更换":
-            # print("dislike results num: ", str(len(self.DislikeResults)))
-            self.DislikeResults.append(self.KB_pointer)
-            for item in self.KB_results:
-                if item not in self.DislikeResults:
-                    self.new_offer = item
-                    break
             else:
-                self.new_offer = None
-            SysAct = {'offer': self.new_offer, # TODO 是否换 offer 这个标签，亦驰可以根据 NLG 的实现来定
-                      'inform': ['产品介绍'],
-                      'domain': self.domain}
-            return SysAct
+                SysAct = {'sorry': "对不起未能找到符合要求的业务，您能重新描述您的要求吗？",
+                            'domain': self.domain}
+                return SysAct
         elif self.UsrAct == "问询说明":
             SysAct = {'offerhelp':None,
                       'domain': self.domain} # 回复问询说明
@@ -259,9 +350,10 @@ class RulePolicy:
                       'domain': self.domain}
             return SysAct
         else:
-            SysAct = {'sorry': None,
-                      'domain': self.domain} # "未能找到满意答案，您可登录中国移动网上营业厅查找相关最新信息"
+            SysAct = {'sorry': "宝宝找不到满意的答案，您可登录中国移动网上营业厅查找相关最新信息",
+                      'domain': self.domain}
             return SysAct
+
 
 
 if __name__ == '__main__':

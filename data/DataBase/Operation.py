@@ -47,22 +47,22 @@ class DBOperationWrapper:
             for slot in ["功能费", "套餐内容_国内流量", "套餐内容_国内主叫"]:
                 if slot in feed_dict:
                     constraints.append("%s >= %f AND %s <= %f" % (slot, feed_dict[slot][0], slot, feed_dict[slot][1]))
-            if "功能费_文字描述" in feed_dict:
+            # 有数字就以数字为准
+            if "功能费_文字描述" in feed_dict and '功能费' not in feed_dict:
                 if feed_dict["功能费_文字描述"] == "高":
                     constraints.append("功能费 >= 200.0 ")
                 elif feed_dict["功能费_文字描述"] == "中":
                     constraints.append("功能费 >= 50.0 AND 功能费 < 200.0")
                 else:
                     constraints.append("功能费 < 50.0")
-            if "套餐内容_国内流量_文字描述" in feed_dict:
+            if "套餐内容_国内流量_文字描述" in feed_dict and '套餐内容_国内流量' not in feed_dict:
                 if feed_dict["套餐内容_国内流量_文字描述"] == "高":
                     constraints.append("套餐内容_国内流量 >= 1500.0 ")
                 elif feed_dict["套餐内容_国内流量_文字描述"] == "中":
                     constraints.append("套餐内容_国内流量 >= 400.0 AND 套餐内容_国内流量 < 1500.0")
                 else:
                     constraints.append("套餐内容_国内流量 <= 400.0")
-
-            if "套餐内容_国内主叫_文字描述" in feed_dict:
+            if "套餐内容_国内主叫_文字描述" in feed_dict and '套餐内容_国内主叫' not in feed_dict:
                 if feed_dict["套餐内容_国内主叫_文字描述"] == "高":
                     constraints.append("套餐内容_国内主叫 >= 1500.0 ")
                 elif feed_dict["套餐内容_国内主叫_文字描述"] == "中":
@@ -71,7 +71,8 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内主叫 <= 400.0")
 
             command += " AND ".join(constraints)
-            command += "\nORDER BY 套餐内容_国内流量 DESC,套餐内容_国内主叫 DESC,套餐内容_国内短信 DESC,套餐内容_国内彩信 DESC"
+            command += " AND 套餐内容_国内流量 IS NOT NULL AND 功能费 IS NOT NULL AND 套餐内容_国内主叫 IS NOT NULL"
+            command += "\nORDER BY 功能费, 套餐内容_国内流量 DESC"
             try:
                 return_results = [item for item in self.cur.execute(command)]
             except:
@@ -86,14 +87,14 @@ class DBOperationWrapper:
             for slot in ["功能费", "套餐内容_国内流量"]:
                 if slot in feed_dict:
                     constraints.append("%s >= %f AND %s <= %f" % (slot, feed_dict[slot][0], slot, feed_dict[slot][1]))
-            if "功能费_文字描述" in feed_dict:
+            if "功能费_文字描述" in feed_dict and '功能费' not in feed_dict:
                 if feed_dict["功能费_文字描述"] == "高":
-                    constraints.append("功能费 >= 300.0 ")
+                    constraints.append("功能费 >= 100.0 ")
                 elif feed_dict["功能费_文字描述"] == "中":
-                    constraints.append("功能费 >= 100.0 AND 功能费 < 300.0")
+                    constraints.append("功能费 >= 30.0 AND 功能费 < 100.0")
                 else:
-                    constraints.append("功能费 < 100.0")
-            if "套餐内容_国内流量_文字描述" in feed_dict:
+                    constraints.append("功能费 < 30.0")
+            if "套餐内容_国内流量_文字描述" in feed_dict and '套餐内容_国内流量' not in feed_dict:
                 if feed_dict["套餐内容_国内流量_文字描述"] == "高":
                     constraints.append("套餐内容_国内流量 >= 1500.0 ")
                 elif feed_dict["套餐内容_国内流量_文字描述"] == "中":
@@ -102,7 +103,8 @@ class DBOperationWrapper:
                     constraints.append("套餐内容_国内流量 <= 400.0")
 
             command += " AND ".join(constraints)
-            command += "\nORDER BY 套餐内容_国内流量 DESC"
+            command += " AND 套餐内容_国内流量 IS NOT NULL AND 功能费 > 0.0 AND 套餐内容_其他功能 IS NULL"
+            command += "\nORDER BY 功能费, 套餐内容_国内流量 DESC"
             try:
                 return_results = [item for item in self.cur.execute(command)]
             except:
@@ -117,7 +119,7 @@ class DBOperationWrapper:
             for slot in ["功能费"]:
                 if slot in feed_dict:
                     constraints.append("%s >= %f AND %s <= %f" % (slot, feed_dict[slot][0], slot, feed_dict[slot][1]))
-            if "功能费_文字描述" in feed_dict:
+            if "功能费_文字描述" in feed_dict and '功能费' not in feed_dict:
                 if feed_dict["功能费_文字描述"] == "高":
                     constraints.append("功能费 >= 300.0 ")
                 elif feed_dict["功能费_文字描述"] == "中":
