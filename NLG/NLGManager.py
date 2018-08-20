@@ -100,6 +100,7 @@ def rule_based_NLG(DST):
                     nl = period_handler(nl, '该套餐' +  req_slot+'：' + value)
                 else:
                     nl = period_handler(nl, '该套餐的' +  req_slot+'为' + value)
+                nl += '\n'
                 prev_req_slot = req_slot
 
         return nl
@@ -164,6 +165,10 @@ def rule_based_NLG(DST):
 
     SysAct = DST.DialogState['SystemAct']['curr_turn']
     nl = ''
+
+    if not SysAct:
+        nl += '说一些啥'
+
     offered_entity = SysAct['offer'] if 'offer' in SysAct.keys() else None
     compared_entities = SysAct['offer_comp'] if 'offer_comp' in SysAct.keys() else None
     # for sysact_type, content in SysAct.items():
@@ -239,6 +244,8 @@ def rule_based_NLG(DST):
         nl = period_handler(nl, '') + '\n'
     if 'offerhelp' in SysAct.keys():
         nl += SysAct['domain'] + '领域的说明' #TODO: 问询说明的内容？
+    if 'ask_entity' in SysAct.keys():
+        nl += "请问您在问哪个业务？"
     if 'sorry' in SysAct.keys():
         nl += '未能找到满意答案，您可登录中国移动网上营业厅查找相关最新信息'
     if 'chatting' in SysAct.keys():

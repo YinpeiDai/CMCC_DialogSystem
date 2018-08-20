@@ -47,10 +47,15 @@ class DialogAgent:
         self.dialog_history = []
 
     def run(self):
-        last_DA = None   # ?
         try:
             while True:
                 user_utter = input("用户输入：")
+
+                if user_utter == 'restart':
+                    self.dst = DialogStateTracker(UserPersonal)
+                    print('对话状态已重置')
+                    continue
+
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
 

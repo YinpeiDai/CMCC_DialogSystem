@@ -3,11 +3,10 @@ import sys
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '../../..'))
 import tensorflow as tf
-import copy, pprint
 from data.DataManager import DataManager
 from NLU.UserAct.model.input_data import *
 from NLU.UserAct.model.model import *
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 
 def train(user_act_dataset):
@@ -31,7 +30,7 @@ def train(user_act_dataset):
         display_step = 100
         valid_data, valid_output = user_act_dataset.produce_valid_data()
         valid_char_emb, valid_word_emb, seqlen = data_manager.sent2num(valid_data, 40, 6)
-        for step in range(40000):
+        for step in range(20000):
             batch_data, batch_output = user_act_dataset.next_train_batch()
             train_char_emb, train_word_emb, seqlen = data_manager.sent2num(batch_data, 40, 6)
             _, training_loss, training_accu = sess.run([model.train_op, model.final_loss, model.accuracy],
@@ -56,10 +55,10 @@ def train(user_act_dataset):
                 average_loss = 0
                 average_accu = 0
 
-            if step == 20000:
-                model.assign_lr(sess, 0.00005)
-            if step == 30000:
-                model.assign_lr(sess, 0.00001)
+            if step == 12000:
+                model.assign_lr(sess, 0.0005)
+            if step == 17000:
+                model.assign_lr(sess, 0.0001)
 
         # 保存模型
         saver.save(sess, "./ckpt/model.ckpt")

@@ -131,7 +131,7 @@ class DialogStateTracker:
         # 最后更新system act
         self.DialogState['SystemAct']['curr_turn'] = rule_policy.Reply(self.DialogState)
         if self.DialogState['SystemAct']['curr_turn'] == None:
-            self.DialogState['SystemAct']['curr_turn'] = self.DialogState['SystemAct']['prev_turn']
+            self.DialogState['SystemAct']['curr_turn'] = {}
 
         if 'offer' in self.DialogState['SystemAct']['curr_turn'].keys():
             self.DialogState['OfferedResult']['curr_turn'] = \
@@ -174,6 +174,8 @@ class DialogStateTracker:
                         temp +=str(ent['主业务']) + '\n'
                     else:
                         temp += 'None\n'
+                elif entity is None:
+                    temp += 'None\n'
                 else:
                     raise ValueError('invalid entity type')
             return temp
