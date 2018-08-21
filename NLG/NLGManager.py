@@ -32,7 +32,8 @@ def period_handler(nl, nl_to_add):
         nl += nl_to_add
     else:
         nl += '。'+nl_to_add
-
+    if nl_to_add=='\n' and nl[-2]=='\n':
+        nl = nl[:-1]
     return nl
 
 
@@ -40,9 +41,11 @@ def period_handler(nl, nl_to_add):
 def rule_based_NLG(DST):
     def inform_template(content, offered_entity = None):
         nl = ''
-        # 'inform' 的content为一个requestable slot组成的list
+        # 'inform' 的content为一个requested slot组成的list
+        # 要求offered_entity唯一，即提供实体的dict
         if offered_entity is None:
             # 用户动作为request但未提供业务实体，返回“普适”的slots？
+            # Global slot已删去，此分支需要重写
             for req_slot in content:
                 if req_slot in special_slot_mapping:
                     nl += '该套餐的' + special_slot_mapping[req_slot] + '为：'
@@ -80,8 +83,12 @@ def rule_based_NLG(DST):
                             value = 0 if value=='无' else value
                             temp += str(value) + '分钟，'
                         elif '流量' in req_slot:
-                            value = 0 if value=='无' else value
-                            temp += str(value) + 'MB，' #TODO: MB,GB的转换
+                            value_mb = 0 if value=='无' else value
+                            if value_mb<1024:
+                                temp += str(value_mb) + 'MB，'
+                            else:
+                                value_gb = value_mb//1024
+                                temp += str(value_gb) + 'GB，'
                         elif '彩信' in req_slot or '短信' in req_slot:
                             value = 0 if value=='无' else value
                             temp += str(value) + '条，'
@@ -170,6 +177,7 @@ def rule_based_NLG(DST):
             nl += '您还要查询该套餐的其他信息吗？'
         return nl
 
+    # main
     SysAct = DST.DialogState['SystemAct']['curr_turn']
     nl = ''
 
@@ -214,19 +222,19 @@ def rule_based_NLG(DST):
                     nl = period_handler(nl,  '\n')
                     # 一个entity， 不return，等下面处理inform，request等act
                 elif isinstance(entity, list):
-                    # 多个entity，一般为用户在查询，即inform的情况
+                    # 多个entity，目前可能出现的情况：同时办理
                     # 遍历sys act后return
                     if 'inform' in SysAct.keys():
                         for req_slot in SysAct['inform']:
-                            nl += req_slot + '：\n'
-                            for idx, entity in enumerate(compared_entities):
+                            nl += '这些套餐的' + req_slot + '如下：\n'
+                            for idx, entity in enumerate(offered_entity):
                                 ent = entity['子业务'] if entity['子业务'] is not None else entity['主业务']
                                 nl += str(idx+1) + '. ' + ent + '：'
                                 nl += inform_template([req_slot], offered_entity =entity)
                                 nl = period_handler(nl, '\n')
-                    if 'reqmore' in SysAct.keys():
-                        nl += reqmore_template()
-                        nl = period_handler(nl, '\n')
+                    # if 'reqmore' in SysAct.keys():
+                    #     nl += reqmore_template()
+                    #     nl = period_handler(nl, '\n')
                     return nl
             else:
                 # 用户问询的对象没变，继续下面的内容
@@ -257,7 +265,7 @@ def rule_based_NLG(DST):
     if 'ask_entity' in SysAct.keys():
         nl += "请问您在问哪个业务？"
     if 'sorry' in SysAct.keys():
-        nl += '未能找到满意答案，您可登录中国移动网上营业厅查找相关最新信息'
+        nl += SysAct['sorry']
     if 'chatting' in SysAct.keys():
         strategy = random.choice([0,1,2])
         if strategy == 0:

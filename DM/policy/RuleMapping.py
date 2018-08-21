@@ -57,7 +57,7 @@ class RulePolicy:
         self.not_mentioned_informable_slots = \
             ["功能费", "套餐内容_国内流量", "套餐内容_国内主叫", "开通方向"]
         self.DislikeResults = [] # 用户明确说不要某业务，就存到这里
-        self.offer = None
+        self.prev_offer = None
         # 用于 要求更多 要求更少 时做filter
 
     def Ask_more_or_less(self, required_slots, KB_results, KB_pointer, UsrAct):
@@ -122,8 +122,8 @@ class RulePolicy:
                 "开通方向" in self.not_mentioned_informable_slots:
             self.not_mentioned_informable_slots.remove("开通方向")
 
-        self.domain = CurrrentDialogState["DetectedDomain"]["curr_turn"]
-        self.UsrAct = CurrrentDialogState['UserAct']['curr_turn']
+        self.domain = CurrrentDialogState["DetectedDomain"]["curr_turn"][0]
+        self.UsrAct = CurrrentDialogState['UserAct']['curr_turn'][0]
         self.last_SysAct = CurrrentDialogState['SystemAct']['curr_turn'].keys()
         self.requestable_slots = set(CurrrentDialogState["RequestedSlot"]["curr_turn"])
         self.ER = copy.deepcopy(CurrrentDialogState["EntityMentioned"]["curr_turn"])
@@ -136,32 +136,39 @@ class RulePolicy:
         # print("== DislikeResults:", self.DislikeResults)
 
         if len(self.ER) == 1:
-            self.new_offer = self.ER[0] # 业务实体优先填充
+            self.new_offer = self.ER[0] # 提及的业务实体优先填充
         elif len(self.ER) > 1:
-            SysAct = {'sorry': '=== 您一句话提到多个业务实体，又不是比较的情况, 宝宝还没想好怎么回答！\n ==='
-                                 '=== 请输入 restart 重新开始对话 ===',
-                      'domain': self.domain}
-            return SysAct
-        # 如果 belief_states 更新了，KB_resluts 也找到了，任选一个填充
-        elif not self.offer and len(self.KB_results) > 0:
-        # and self.IsInformableSlotChanged:
-            while True:
-                item = random.choice(self.KB_results)
-                if item not in self.DislikeResults:
-                    self.new_offer = item
-                    break
-        elif len(self.KB_results) > 0 and self.offer not in self.KB_results and self.IsInformableSlotChanged:
-            while True:
-                item = random.choice(self.KB_results)
-                if item not in self.DislikeResults:
-                    self.new_offer = item
-                    break
-        else:
-            self.new_offer = self.offer
-        # print('=== new_offer:',self.new_offer)
-        # print('=== offer:',self.offer)
+            if self.UsrAct == "比较" or self.UsrAct == "同时办理":
+                 pass # 后面 UsrAct=='比较 的分支会处理这种情况
+            else:
+                SysAct = {'sorry': '您一句话提到多个业务实体，又不是比较的情况, 宝宝还没想好怎么回答！\n '
+                                     '=== 请输入 restart 重新开始对话 ===',
+                          'domain': self.domain}
+                return SysAct
 
+
+        elif len(self.KB_results) == 0 or self.prev_offer in self.KB_results:
+            # 若没有查询结果，或上一轮的offer在本轮的查询结果中，本论直接提供
+            # 上一轮的offer结果（注意：可能为None）
+            self.new_offer = self.prev_offer
+        else:
+            # KB_results中所有不在DislikeResults中的实体，任选一个
+            find_new_offer = False
+            random.shuffle(self.KB_results)
+            for entity in self.KB_results:
+                if entity not in self.DislikeResults:
+                    self.new_offer = entity
+                    find_new_offer = True
+                    break
+            if not find_new_offer:
+                self.DislikeResults = []
+                self.new_offer = self.KB_results[0]
+
+
+        # 第一类UsrAct：告知
         if self.UsrAct == "告知":
+            # 逻辑：50%可能性接着问，50%可能返回查询到的结果
+            # request部分，不需要提供实体
             if random.random() > 0.5:
                 # 系统问询一到两个 informable slot
                 if self.domain == "套餐":
@@ -198,12 +205,29 @@ class RulePolicy:
                                   'domain': self.domain} # 例如 "想要多少价格的WLAN套餐？"
                         return SysAct
 
+            # 告知意味着查找业务，如果没找到业务，可以直接返回重新查找了
             if len(self.KB_results) == 0:
                 SysAct = {'sorry': "很抱歉，没有找到符合您要求的业务，您能重新描述您对费用、流量、通话时长的要求吗？",
-                          'clear_DST': True,
+                          'clear_state': True,
                           'domain': self.domain}
                 return SysAct
 
+            if len(self.KB_results) == 0 or self.prev_offer in self.KB_results:
+                # 若没有查询结果，或上一轮的offer在本轮的查询结果中，本论直接提供
+                # 上一轮的offer结果（注意：可能为None）
+                self.new_offer = self.prev_offer
+            else:
+                # KB_results中所有不在DislikeResults中的实体，任选一个
+                find_new_offer = False
+                random.shuffle(self.KB_results)
+                for entity in self.KB_results:
+                    if entity not in self.DislikeResults:
+                        self.new_offer = entity
+                        find_new_offer = True
+                        break
+                if not find_new_offer:
+                    self.DislikeResults = []
+                    self.new_offer = self.KB_results[0]
 
             if self.new_offer != None:
                 SysAct = {'offer': self.new_offer,
@@ -211,29 +235,34 @@ class RulePolicy:
                           'reqmore': None,  # None 是因为 reqmore 没有参数
                           'domain': self.domain}
                 #  NLG 的实现例如 "***套餐价格... 您有什么需要了解的?"
-                self.offer = self.new_offer
+                self.prev_offer = self.new_offer
                 return SysAct
             else:
                 SysAct = {'sorry': '很抱歉，没有找到符合您要求的业务',
                           'change_DST_prev_turn': True,
                           'domain': self.domain}
                 return SysAct
+        # 第二类UsrAct：问询
         elif self.UsrAct == "问询":
-            if self.new_offer:
-                # 如果本轮有offer的entity，提供该entity的告知结果
-                pass
-            elif self.KB_pointer:
-                # 如果本轮没有offer的entity，提供上一轮的entity的告知结果
-                self.new_offer = self.KB_pointer
-            elif self.domain == "个人":
+            if self.domain == "个人":
+                # 问个人信息的情况最简单直接，优先处理
                 SysAct = {'inform': list(self.requestable_slots),
-                          'domain': self.domain}  # 例如 "***套餐的***是***" 语句要尽量自然
+                                'domain': self.domain}
                 return SysAct
+            # 问业务实体，要先确定问的是什么
+            if len(self.ER) == 1:
+                # 如果本轮有提及的entity，八成就是在问这个entity
+                self.new_offer = self.ER[0]
+            elif self.KB_pointer:
+                # 如果本轮没有提到的entity，默认问询对象不变
+                self.new_offer = self.KB_pointer
+                # TODO: KB_pointer和prev_offer的合并
             else:
                 # 如果上一轮也没有offer的entity，询问用户在问哪个entity
-                SysAct = {'ask_entity': self.new_offer,
+                SysAct = {'ask_entity': None,
                           'domain':self.domain }
                 return SysAct
+            # 根据领域检测的结果对requestable_slots进行一些修正
             if self.domain == "家庭多终端":
                 if "能否分享" in self.requestable_slots:
                     self.requestable_slots.remove("能否分享")
@@ -251,33 +280,37 @@ class RulePolicy:
                     self.requestable_slots.add("副卡客户限制")
                     self.requestable_slots.add("主卡套餐限制")
                     self.requestable_slots.add("其他开通限制")
-            # 对一些 slot 增加一些补充
+            # 对某些特殊 slot 增加一些补充
             if "限速说明" in self.requestable_slots:
                 self.requestable_slots.add("封顶说明")
             if "适用品牌" in self.requestable_slots:
                 self.requestable_slots.add("互斥业务")
-            if self.offer == self.new_offer:
-                SysAct = {'offer': self.new_offer,
-                          'inform': list(self.requestable_slots),
-                          'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
-                return SysAct
-            else:
+            # TODO: 这里应该多维护一个history requestable slot，
+            #             根据这个删减requestable_slots 里的内容，避免重复告知
+            # 返回对应的系统动作
+            if not self.requestable_slots or '产品介绍' in self.requestable_slots:
+                # 1. 如果未检测出requested slot，默认回复产品介绍
+                # 2. 如果检测出产品介绍，则只回复笼统介绍并抛出reqmore
+                #     目的是避免产品介绍和细节同时推过用户。通过reqmore让用户在下一轮问细节。
                 SysAct = {'offer': self.new_offer,
                           'inform': ["产品介绍"],
                           'reqmore': None,  # None 是因为 reqmore 没有参数
                           'domain': self.domain}
-                self.offer = self.new_offer
+                self.prev_offer = self.new_offer
                 return SysAct
-            # else:
-            #     # 只返回具有一定普适性的问询槽
-            #     SysAct = {'inform': [i for i in self.requestable_slots if i in GLOBAL_slots ],
-            #               'domain': self.domain}  # 例如 "***套餐的***是***" 语句要尽量自然
-            #     return SysAct
+            else:
+                # 无论self.prev_offer==self.new_offer还是提到了新实体并问了某特定slot
+                # 都应为此系统动作
+                SysAct = {'offer': self.new_offer,
+                          'inform': list(self.requestable_slots),
+                          'domain':self.domain }  # 例如 "***套餐的***是***" 语句要尽量自然
+                return SysAct
+
         elif self.UsrAct == "比较":
             # 比较不同的套餐
             # 先考虑用户主动提及集合
-            if len(CurrrentDialogState["EntityMentioned"]["curr_turn"]) > 1:
-                self.compared_entities = CurrrentDialogState["EntityMentioned"]["curr_turn"]
+            if len(self.ER) > 1:
+                self.compared_entities = self.ER
             # 再考虑对话系统提供的业务实体集
             elif self.KB_pointer != CurrrentDialogState["OfferedResult"]["prev_turn"]:
                 self.compared_entities = [self.KB_pointer, CurrrentDialogState["OfferedResult"]["prev_turn"]]
@@ -316,21 +349,27 @@ class RulePolicy:
                     SysAct = {'offer': self.new_offer,
                               'inform': ['产品介绍'],
                               'domain': self.domain}
-                    self.offer = self.new_offer
+                    self.prev_offer = self.new_offer
                     return SysAct
         elif self.UsrAct == "更换":
         # print("dislike results num: ", str(len(self.DislikeResults)))
             if len(self.KB_results) > 1:
                 self.DislikeResults.append(self.KB_pointer)
-                while True:
-                    item = random.choice(self.KB_results)
-                    if item not in self.DislikeResults:
-                        self.new_offer = item
+                find_new_offer = False
+                random.shuffle(self.KB_results)
+                for entity in self.KB_results:
+                    if entity not in self.DislikeResults:
+                        self.new_offer = entity
+                        find_new_offer = True
                         break
+                if not find_new_offer:
+                    self.DislikeResults = []
+                    self.new_offer = self.KB_results[0]
+
                 SysAct = {'offer': self.new_offer,
                           'inform': ['产品介绍'],
                           'domain': self.domain}
-                self.offer = self.new_offer
+                self.prev_offer = self.new_offer
                 return SysAct
             else:
                 SysAct = {'sorry': "对不起未能找到符合要求的业务，您能重新描述您的要求吗？",
@@ -345,6 +384,8 @@ class RulePolicy:
                       'domain': self.domain}  # 引导用户进入任务 例如, "嘻嘻，那请问您想要什么样的套餐？"
             return SysAct
         elif self.UsrAct == "同时办理":
+            # 现在只会回复提到的两个业务的“互斥业务”slot
+            # TODO: 需要对家庭多终端进行特别判断
             SysAct = {'offer': self.ER ,
                       'inform': ['互斥业务'],
                       'domain': self.domain}

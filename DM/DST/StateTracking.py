@@ -61,17 +61,17 @@ DialogStateSample = {
 class DialogStateTracker:
     def __init__(self, usr_personal, print_details):
         self.DialogState = {
-            'TurnNum': 0,
-            'EntityMentioned': {'curr_turn': [],  'prev_turn': []},
-            'UserPersenal': usr_personal,
-            'QueryResults': [],
-            'OfferedResult': {'curr_turn': {},  'prev_turn': {}},
-            'SystemAct': {'curr_turn': {},  'prev_turn': {}},
-            'BeliefState':{'curr_turn': {},  'prev_turn': {}},
-            'RequestedSlot':{'curr_turn': [],  'prev_turn': []},
-            'DetectedDomain': {'curr_turn': None,  'prev_turn': None},
-            'UserAct': {'curr_turn': None,  'prev_turn': None}
-        }
+             'TurnNum': 0,
+             'EntityMentioned': {'curr_turn': [],  'prev_turn': []},
+             'UserPersenal': usr_personal,
+             'QueryResults': [],
+             'OfferedResult': {'curr_turn': {},  'prev_turn': {}},
+             'SystemAct': {'curr_turn': {},  'prev_turn': {}},
+             'BeliefState':{'curr_turn': {},  'prev_turn': {}},
+             'RequestedSlot':{'curr_turn': [],  'prev_turn': []},
+             'DetectedDomain': {'curr_turn': None,  'prev_turn': None},
+             'UserAct': {'curr_turn': None,  'prev_turn': None}
+         }
         # status variables
         self.isDSTChange = True
         self.isOfferedEntityChange = True
@@ -88,15 +88,17 @@ class DialogStateTracker:
         :param data_manager: data_manager
         """
         self.DialogState['TurnNum'] += 1
+        self.isUtterChange = False if self.user_utter == NLU_results['userutter'] else True
+        self.user_utter = NLU_results['userutter']
         # 复制上一轮的dialog state到prev_turn
         for key,value in self.DialogState.items():
             if isinstance(value,dict) and 'prev_turn' in value.keys():
                 value['prev_turn'] = copy.deepcopy(value['curr_turn'])
 
         # 利用本轮NLU结果更新当前轮的dialog state
+        self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
         self.DialogState['RequestedSlot']['curr_turn'] = NLU_results['requestable']
-        self.DialogState['DetectedDomain']['curr_turn'] =NLU_results['domain'][0]
-        self.DialogState['UserAct']['curr_turn'] = NLU_results['useract'][0]
+        self.DialogState['UserAct']['curr_turn'] = NLU_results['useract']
         for slot, value in NLU_results['informable'].items():
             self.DialogState['BeliefState']['curr_turn'][slot] = value
         # TODO: sentiment
@@ -125,7 +127,7 @@ class DialogStateTracker:
                         self.DialogState['EntityMentioned']['curr_turn'] += ent
         else:
             QueryResults = data_manager.SearchingByConstraints(
-                table=self.DialogState['DetectedDomain']['curr_turn'],
+                table=self.DialogState['DetectedDomain']['curr_turn'][0],
                 feed_dict=self.DialogState['BeliefState']['curr_turn'])
         self.DialogState['QueryResults'] = QueryResults
 
@@ -140,14 +142,12 @@ class DialogStateTracker:
             self.DialogState['OfferedResult']['curr_turn'] = \
             self.DialogState['SystemAct']['curr_turn']['offer']
         else:
-            self.DialogState['OfferedResult']['curr_turn'] = \
-            self.DialogState['OfferedResult']['prev_turn']
+            self.DialogState['OfferedResult']['curr_turn'] = None
 
         # 过滤掉一些不必要的requested slots
         self.sysact_filter()
 
         # 状态判断量的更新
-        self.isUtterChange = False if self.user_utter == NLU_results['userutter'] else True
         self.isDSTChange = False
         for key,value in self.DialogState.items():
             if isinstance(value, dict) and 'prev_turn' in value.keys():
@@ -157,8 +157,12 @@ class DialogStateTracker:
            self.DialogState['OfferedResult']['prev_turn'] else True
 
         # 打印对话状态
-        if self.print_details:
-            self.dialog_state_print()
+        if self.print_details: self.dialog_state_print()
+
+        if 'clear_state' in self.DialogState['SystemAct']['curr_turn']:
+            self.DialogState['BeliefState']['curr_turn'] = {}
+            self.DialogState['DetectedDomain']['curr_turn'] = None
+            if self.print_details: print('belief state已重置')
 
     def dialog_state_print(self):
         # dialog state printer
@@ -283,19 +287,22 @@ class DialogStateTracker:
                 for slot in req_slots:
                     if '套餐内容_' in slot:
                         req_slots.remove(slot)
-                        if self.print_details: print("问询项存在“套餐内容”，移除“%s”" %slot)
+                        if self.print_details:
+                            print("问询项存在“套餐内容”，移除“%s”" %slot)
             if '超出处理' in req_slots:
                 for slot in req_slots:
                     if '超出处理_' in slot: req_slots.remove(slot)
-                    if self.print_details: print("问询项存在“超出处理”，移除“%s”" %slot)
+                    if self.print_details:
+                        print("问询项存在“超出处理”，移除“%s”" %slot)
             if '结转规则' in req_slots:
                 for slot in req_slots:
                     if '结转规则_' in slot: req_slots.remove(slot)
-                    if self.print_details: print("问询项存在“结转规则”，移除“%s”" %slot)
+                    if self.print_details:
+                        print("问询项存在“结转规则”，移除“%s”" %slot)
             return req_slots
 
         SysAct = self.DialogState['SystemAct']['curr_turn']
-        domain = self.DialogState['DetectedDomain']['curr_turn']
+        domain = self.DialogState['DetectedDomain']['curr_turn'][0]
         if 'inform' in SysAct.keys():
             req_slots = SysAct['inform']
             req_slots = domain_filter(req_slots, domain)
