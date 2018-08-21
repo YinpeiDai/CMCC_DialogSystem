@@ -135,36 +135,6 @@ class RulePolicy:
                 self.DislikeResults.remove(item)
         # print("== DislikeResults:", self.DislikeResults)
 
-        if len(self.ER) == 1:
-            self.new_offer = self.ER[0] # 提及的业务实体优先填充
-        elif len(self.ER) > 1:
-            if self.UsrAct == "比较" or self.UsrAct == "同时办理":
-                 pass # 后面 UsrAct=='比较 的分支会处理这种情况
-            else:
-                SysAct = {'sorry': '您一句话提到多个业务实体，又不是比较的情况, 宝宝还没想好怎么回答！\n '
-                                     '=== 请输入 restart 重新开始对话 ===',
-                          'domain': self.domain}
-                return SysAct
-
-
-        elif len(self.KB_results) == 0 or self.prev_offer in self.KB_results:
-            # 若没有查询结果，或上一轮的offer在本轮的查询结果中，本论直接提供
-            # 上一轮的offer结果（注意：可能为None）
-            self.new_offer = self.prev_offer
-        else:
-            # KB_results中所有不在DislikeResults中的实体，任选一个
-            find_new_offer = False
-            random.shuffle(self.KB_results)
-            for entity in self.KB_results:
-                if entity not in self.DislikeResults:
-                    self.new_offer = entity
-                    find_new_offer = True
-                    break
-            if not find_new_offer:
-                self.DislikeResults = []
-                self.new_offer = self.KB_results[0]
-
-
         # 第一类UsrAct：告知
         if self.UsrAct == "告知":
             # 逻辑：50%可能性接着问，50%可能返回查询到的结果
