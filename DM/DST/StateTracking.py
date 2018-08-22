@@ -95,16 +95,59 @@ class DialogStateTracker:
             if isinstance(value,dict) and 'prev_turn' in value.keys():
                 value['prev_turn'] = copy.deepcopy(value['curr_turn'])
 
-        # 利用本轮NLU结果更新当前轮的dialog state
-        self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
+        # 优先更新识别准确率相对较高的UsrAct
+        if self.DialogState['TurnNum'] == 1 and \
+            NLU_results['useract'][0] in [ '要求更多', '要求更少', '更换']:
+            self.DialogState['UserAct']['curr_turn'] = ('问询', 0.5)
+            if self.print_details:
+                print("第一轮不应出现'要求更多', '要求更少', '更换'等用户动作，强制修正为问询")
+        else:
+            self.DialogState['UserAct']['curr_turn'] = NLU_results['useract']
+
+        # 更新domain
+        if NLU_results['domain'][0] == '个人':
+            if '我' in self.user_utter or '查' in self.user_utter:
+                self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
+            elif  self.DialogState['TurnNum'] == 1:
+                self.DialogState['DetectedDomain']['curr_turn'] = ('套餐', 0.5)
+                if self.print_details: print("第一轮误识为个人领域，强制修正为套餐领域")
+            else:
+                self.DialogState['DetectedDomain']['curr_turn'] = \
+                (self.DialogState['DetectedDomain']['prev_turn'][0], 0.5)
+                if self.print_details: print("本轮误识为个人领域，修正为上一轮的领域")
+        elif self.DialogState['TurnNum'] == 1:
+            self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
+        elif NLU_results['domain'][0] != self.DialogState['DetectedDomain']['prev_turn'][0]:
+            if self.DialogState['UserAct']['curr_turn'][0] in [ '要求更多', '要求更少', '更换']:
+                #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
+                if self.print_details: print("本轮用户动作有领域延续性，自动继承上一轮的领域")
+            elif NLU_results['domain'][1] > 0.7:
+                self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
+            else:
+                #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
+                if self.print_details:
+                    print("本轮领域识别结果:", NLU_results['domain'])
+                    print("置信度过低，自动继承上一轮的领域")
+        else:
+            self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
+
+        # 更新requested slot
         self.DialogState['RequestedSlot']['curr_turn'] = NLU_results['requestable']
-        self.DialogState['UserAct']['curr_turn'] = NLU_results['useract']
-        for slot, value in NLU_results['informable'].items():
-            self.DialogState['BeliefState']['curr_turn'][slot] = value
+
+        # 更新informable slot
+        if self.DialogState['UserAct']['curr_turn'][0] in [ '要求更多', '要求更少', '更换']:
+            # pass，即self.DialogState['BeliefState']['curr_turn']不变
+            if self.print_details:
+                print("本轮的informable slot识别结果：", NLU_results['informable'])
+                print("由于用户动作具有状态延续性，舍弃本轮识别结果，自动继承上一轮的belief state")
+        else:
+            for slot, value in NLU_results['informable'].items():
+                self.DialogState['BeliefState']['curr_turn'][slot] = value
+
         # TODO: sentiment
         # self.detected_sentiment = ?
         self.DialogState['EntityMentioned']['curr_turn']= []
-        print(NLU_results['entity'])
+        if self.print_details: print("NLU实体识别结果：", NLU_results['entity'])
         if NLU_results['entity']:
             QueryResults = []
             for entity_name in NLU_results['entity']:
@@ -192,7 +235,7 @@ class DialogStateTracker:
                     temp += 'None\n'
                 else:
                     raise ValueError('invalid entity type')
-            return temp
+            return temp[:-1]
 
         def print_QR(self):
             QR = self.DialogState['QueryResults']
@@ -203,14 +246,14 @@ class DialogStateTracker:
                         temp += '   '+str(ent['子业务']) + '\n'
                     elif '主业务' in ent and ent['主业务'] is not None:
                         temp += '   '+str(ent['主业务']) + '\n'
-            return temp
+            return temp[:-1]
 
         def print_NLU(self, dst_key_name):
             temp = ' - ' + dst_key_name + '\n'
             for turn in ['prev_turn', 'curr_turn']:
                 result = self.DialogState[dst_key_name][turn]
                 temp += '   '+turn+': ' + str(result) + '\n'
-            return temp
+            return temp[:-1]
 
         def print_sysact(self):
             SysAct = self.DialogState['SystemAct']
@@ -240,7 +283,7 @@ class DialogStateTracker:
                         temp = temp[:-2] + '\n'
                     else:
                         temp += str(content)+'\n'
-            return temp
+            return temp[:-1]
 
         print('Dialog State in turn %d:' %self.DialogState['TurnNum'])
         print(print_entity(self, 'EntityMentioned'))
@@ -251,8 +294,8 @@ class DialogStateTracker:
         print(print_NLU(self, 'RequestedSlot'))
         print(print_NLU(self, 'BeliefState'))
         print(print_sysact(self))
-        print(' - isDSTChange:' + str(self.isDSTChange) + '\n')
-        print(' - isUtterChange:' + str(self.isUtterChange) + '\n')
+        print(' - isDSTChange:' + str(self.isDSTChange))
+        print(' - isUtterChange:' + str(self.isUtterChange))
         print(' - isOfferedEntityChange:' + str(self.isOfferedEntityChange) + '\n')
 
 
@@ -308,15 +351,6 @@ class DialogStateTracker:
             req_slots = domain_filter(req_slots, domain)
             req_slots = cost_filter(req_slots)
             req_slots = content_filter(req_slots)
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

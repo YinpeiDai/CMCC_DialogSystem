@@ -258,7 +258,8 @@ class RulePolicy:
             # TODO: 这里应该多维护一个history requestable slot，
             #             根据这个删减requestable_slots 里的内容，避免重复告知
             # 返回对应的系统动作
-            if not self.requestable_slots or '产品介绍' in self.requestable_slots:
+            if not self.requestable_slots :
+            # or '产品介绍' in self.requestable_slots:
                 # 1. 如果未检测出requested slot，默认回复产品介绍
                 # 2. 如果检测出产品介绍，则只回复笼统介绍并抛出reqmore
                 #     目的是避免产品介绍和细节同时推过用户。通过reqmore让用户在下一轮问细节。
