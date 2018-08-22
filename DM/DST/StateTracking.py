@@ -308,7 +308,7 @@ class DialogStateTracker:
             for slot in req_slots:
                 if slot not in domain_slots:
                     req_slots.remove(slot)
-                    if self.print_details: print('删去与本领域无关的slot: '+slot+'\n')
+                    if self.print_details: print('删去与本领域无关的slot: '+slot)
             return req_slots
 
         def cost_filter(req_slots):

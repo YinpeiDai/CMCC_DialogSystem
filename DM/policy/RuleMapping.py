@@ -227,11 +227,13 @@ class RulePolicy:
                 # 如果本轮没有提到的entity，默认问询对象不变
                 self.new_offer = self.KB_pointer
                 # TODO: KB_pointer和prev_offer的合并
-            else:
+            elif not self.KB_results:
                 # 如果上一轮也没有offer的entity，询问用户在问哪个entity
                 SysAct = {'ask_entity': None,
                           'domain':self.domain }
                 return SysAct
+            else:
+                self.new_offer = self.KB_results[0]
             # 根据领域检测的结果对requestable_slots进行一些修正
             if self.domain == "家庭多终端":
                 if "能否分享" in self.requestable_slots:
