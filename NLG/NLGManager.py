@@ -182,11 +182,17 @@ def rule_based_NLG(DST):
     nl = ''
 
     if not SysAct:
-        nl += '说一些啥'
+        nl += '不应该出现这个情况，有bug！'
 
     offered_entity = SysAct['offer'] if 'offer' in SysAct.keys() else None
     compared_entities = SysAct['offer_comp'] if 'offer_comp' in SysAct.keys() else None
-    # for sysact_type, content in SysAct.items():
+    if SysAct['domain'] == '个人':
+        prs_info = DST.DialogState['UserPersenal']
+        nl += '您正在进行个人信息查询\n'
+        for req_slot in SysAct['inform']:
+            nl += req_slot+'：'+prs_info[req_slot]+'\n'
+        nl += '请问您还需要了解其他业务吗？'
+        return nl
     if 'offer_comp' in SysAct.keys():
         nl += '您希望对比的套餐为：'
         for idx, entity in enumerate(compared_entities):
@@ -265,12 +271,11 @@ def rule_based_NLG(DST):
     if 'ask_entity' in SysAct.keys():
         nl += "请问您在问哪个业务？"
     if 'sorry' in SysAct.keys():
-        strategy = random.choice([0,1,2])
+        strategy = random.choice([0,1])
         if strategy == 0:
             nl += '很抱歉，没有找到符合您要求的业务，请您重新描述对费用、包含流量、通话时长的要求~'
-        elif strategy == 1:
+        else:
             nl += '很抱歉，目前暂时没有符合您要求的业务，请放宽对费用、包含流量和通话时长的限制~'
-        nl += nl
     if 'chatting' in SysAct.keys():
         strategy = random.choice([0,1,2])
         if strategy == 0:

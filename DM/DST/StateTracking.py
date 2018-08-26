@@ -29,7 +29,7 @@ Domain_DB_slots_mapping = {
     "号卡": Card_DB_slots,
     "国际港澳台": Overseas_DB_slots,
     "家庭多终端": MultiTerminal_DB_slots,
-    "个人": []
+    "个人": Personal_requestable_slots
 }
 
 
@@ -56,6 +56,9 @@ DialogStateSample = {
     'UserAct': {'curr_turn': "告知",
                 'prev_turn': None}
 }
+
+
+
 
 def rule_based_belief_state_update(usr_act, req_slot, prev_state, prev_offer):
     # 我设想的该函数输入输出和功能应为：
@@ -147,6 +150,8 @@ class DialogStateTracker:
             self.DialogState['UserAct']['curr_turn'] = NLU_results['useract']
 
         # 更新domain
+        prev_domain = self.DialogState['DetectedDomain']['prev_turn'][0] \
+                                  if self.DialogState['DetectedDomain']['prev_turn'] else None
         if NLU_results['domain'][0] == '个人':
             if '我' in self.user_utter or '查' in self.user_utter:
                 self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
@@ -154,12 +159,11 @@ class DialogStateTracker:
                 self.DialogState['DetectedDomain']['curr_turn'] = ('套餐', 0.5)
                 if self.print_details: print("第一轮误识为个人领域，强制修正为套餐领域")
             else:
-                self.DialogState['DetectedDomain']['curr_turn'] = \
-                (self.DialogState['DetectedDomain']['prev_turn'][0], 0.5)
+                self.DialogState['DetectedDomain']['curr_turn'] = (prev_domain, 0.5)
                 if self.print_details: print("本轮误识为个人领域，修正为上一轮的领域")
         elif self.DialogState['TurnNum'] == 1:
             self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
-        elif NLU_results['domain'][0] != self.DialogState['DetectedDomain']['prev_turn'][0]:
+        elif NLU_results['domain'][0] != prev_domain:
             if self.DialogState['UserAct']['curr_turn'][0] in ['更换','要求更多', '要求更少']:
                 #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
                 if self.print_details: print("本轮用户动作有领域延续性，自动继承上一轮的领域")
@@ -249,11 +253,11 @@ class DialogStateTracker:
         # 打印对话状态
         if self.print_details: self.dialog_state_print()
 
-        if 'backtrack' in self.DialogState['SystemAct']['curr_turn']:
-        # 复制上一轮的dialog state到curr_turn
-            for key,value in self.DialogState.items():
-                if isinstance(value,dict) and 'prev_turn' in value.keys():
-                    value['curr_turn'] = copy.deepcopy(value['prev_turn'])
+        # if 'backtrack' in self.DialogState['SystemAct']['curr_turn']:
+        # # 复制上一轮的dialog state到curr_turn
+        #     for key,value in self.DialogState.items():
+        #         if isinstance(value,dict) and 'prev_turn' in value.keys():
+        #             value['curr_turn'] = copy.deepcopy(value['prev_turn'])
 
         if 'clear_state' in self.DialogState['SystemAct']['curr_turn']:
             self.DialogState['BeliefState']['curr_turn'] = {}
@@ -373,7 +377,6 @@ class DialogStateTracker:
                 if self.print_details: print('删去功能费，只询问计费方式')
             elif '功能费' in req_slots:
                 offered_entity = self.DialogState['OfferedResult']['curr_turn']
-                print(offered_entity)
                 if not offered_entity['功能费']:
                     req_slots.insert(0, '计费方式')
                     if self.print_details: print('功能费为None，提供计费方式')
