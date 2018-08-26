@@ -65,7 +65,7 @@ class DialogAgent:
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
                 reply  = rule_based_NLG(self.dst)
-                print('系统:', reply)
+                print('系统:', reply, '\n')
                 self.dialog_history.append({"系统":reply, "用户":user_utter})
                 self.turn_num += 1
 

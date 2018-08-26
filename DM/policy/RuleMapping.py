@@ -49,9 +49,6 @@ DialogStateSample = {
 }
 
 
-
-
-
 class RulePolicy:
     def __init__(self):
         self.not_mentioned_informable_slots = \
@@ -209,7 +206,7 @@ class RulePolicy:
                 return SysAct
             else:
                 SysAct = {'sorry': '很抱歉，没有找到符合您要求的业务',
-                          'change_DST_prev_turn': True,
+                          'backtrack': True,
                           'domain': self.domain}
                 return SysAct
         # 第二类UsrAct：问询
@@ -263,8 +260,6 @@ class RulePolicy:
             if not self.requestable_slots :
             # or '产品介绍' in self.requestable_slots:
                 # 1. 如果未检测出requested slot，默认回复产品介绍
-                # 2. 如果检测出产品介绍，则只回复笼统介绍并抛出reqmore
-                #     目的是避免产品介绍和细节同时推过用户。通过reqmore让用户在下一轮问细节。
                 SysAct = {'offer': self.new_offer,
                           'inform': ["产品介绍"],
                           'reqmore': None,  # None 是因为 reqmore 没有参数
@@ -310,17 +305,19 @@ class RulePolicy:
             if self.new_offer == None:
                 if len(self.ER) == 0 and len(required_slots) == 0 :
                     SysAct = {'sorry': "对不起，您能重新描述您对费用、流量、通话时长的要求吗？",
-                              'clear_DST':True,
+                              'clear_state':True,
                               'domain': self.domain}
                     return SysAct
                 else:
-                    SysAct = {'change_DST': (self.UsrAct, required_slots, self.KB_pointer),
+                    SysAct = {'change_DST': (self.UsrAct, required_slots,
+                                                             self.KB_pointer['子业务']),
                               'domain': self.domain}
                     return SysAct
                     # TODO change_DST，根据 self.UsrAct, required_slots, self.KB_pointer 扩充belief states
             else:
                     SysAct = {'offer': self.new_offer,
-                              'inform': ['产品介绍'],
+                              # 'inform': ['产品介绍'],
+                              'inform': required_slots,
                               'domain': self.domain}
                     self.prev_offer = self.new_offer
                     return SysAct

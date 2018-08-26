@@ -57,6 +57,48 @@ DialogStateSample = {
                 'prev_turn': None}
 }
 
+def rule_based_belief_state_update(usr_act, req_slot, prev_state, prev_offer):
+    # 我设想的该函数输入输出和功能应为：
+    # usr_act: "要求更多"或"要求更少"
+    # req_slot: "要求更多"或"要求更少"的对象
+    #           应为"功能费", "套餐内容_国内流量", "套餐内容_国内主叫"之一
+    #           注意slot可能是通过informable slot检测出的，也可能是通过requested
+    #           slot检测出的，这个我可以在上面写一个判断，函数里不用管这个了
+    # prev_state: 上一轮的belief state
+    # prev_offer: 上一轮的offered entity
+    # 返回：new_state: 针对prev_offer满足要求req_slot更多/更少的新belief state
+
+    # 应该能解决这种情况:
+    # 上一轮说要便宜套餐，系统返回"38元档和4G套餐"，beliefstate为{功能费文字描述：低}
+    # 本轮说要流量更多的套餐：那么本函数应根据识别出的"要求更多"和要求更多的对象流量，
+    # 给出新的slot：比如{功能费文字描述：中, 流量文字描述：中}之类的
+
+    # 实现思路：
+    # 需要对slot_filling那里可能的取值，做取更高还是更低的操作，这个我不太能弄
+    # 需要规则，都更新什么。比如虽然只提到了流量更多，但功能费也要放宽，之类的
+
+    pass
+
+def rule_based_offer(usr_act, req_slot, prev_offer):
+    # 我设想的该函数输入输出和功能应为：
+    # usr_act: "要求更多"或"要求更少"
+    # req_slot: "要求更多"或"要求更少"的对象
+    #           应为"功能费", "套餐内容_国内流量", "套餐内容_国内主叫"之一
+    #           注意slot可能是通过informable slot检测出的，也可能是通过requested
+    #           slot检测出的，这个我可以在上面写一个判断，函数里不用管这个了
+    # prev_offer: 上一轮的offered entity
+    # 返回：new_offer——一个新的offer
+
+    # 应该能解决这种情况:
+    # 上一轮通过mentioned entity提到了一个业务
+    # 本轮想要流量更多的之类的
+
+    # 实现思路应该类似于Ask_more_or_less，我的思路：
+    # 1. 找到prev_offer提供的实体的主业务，比如38档和4G套餐，就找到和4G套餐
+    # 2. 在主业务对应的子业务列表中，要求更多就往下一个，要求更少就往上一个
+    #       要实现这个可能需要改数据库？每个子业务对应的主业务不是None，就简单了
+    # 3. 如何跨主业务offer：没想好。
+    pass
 
 class DialogStateTracker:
     def __init__(self, usr_personal, print_details):
@@ -118,7 +160,7 @@ class DialogStateTracker:
         elif self.DialogState['TurnNum'] == 1:
             self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
         elif NLU_results['domain'][0] != self.DialogState['DetectedDomain']['prev_turn'][0]:
-            if self.DialogState['UserAct']['curr_turn'][0] in [ '要求更多', '要求更少', '更换']:
+            if self.DialogState['UserAct']['curr_turn'][0] in ['更换','要求更多', '要求更少']:
                 #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
                 if self.print_details: print("本轮用户动作有领域延续性，自动继承上一轮的领域")
             elif NLU_results['domain'][1] > 0.7:
@@ -135,11 +177,15 @@ class DialogStateTracker:
         self.DialogState['RequestedSlot']['curr_turn'] = NLU_results['requestable']
 
         # 更新informable slot
-        if self.DialogState['UserAct']['curr_turn'][0] in [ '要求更多', '要求更少', '更换']:
+        if self.DialogState['UserAct']['curr_turn'][0] in ['更换']:
             # pass，即self.DialogState['BeliefState']['curr_turn']不变
             if self.print_details:
                 print("本轮的informable slot识别结果：", NLU_results['informable'])
                 print("由于用户动作具有状态延续性，舍弃本轮识别结果，自动继承上一轮的belief state")
+        elif  self.DialogState['UserAct']['curr_turn'][0] in ['要求更多', '要求更少']:
+            # TODO: rule_based_belief_state_update()
+            if self.print_details:
+                print('还没完成的部分！')
         else:
             for slot, value in NLU_results['informable'].items():
                 self.DialogState['BeliefState']['curr_turn'][slot] = value
@@ -181,6 +227,7 @@ class DialogStateTracker:
         if self.DialogState['SystemAct']['curr_turn'] == None:
             self.DialogState['SystemAct']['curr_turn'] = {}
 
+        # TODO: 添加rule_based_offer()
         if 'offer' in self.DialogState['SystemAct']['curr_turn'].keys():
             self.DialogState['OfferedResult']['curr_turn'] = \
             self.DialogState['SystemAct']['curr_turn']['offer']
@@ -202,10 +249,18 @@ class DialogStateTracker:
         # 打印对话状态
         if self.print_details: self.dialog_state_print()
 
+        if 'backtrack' in self.DialogState['SystemAct']['curr_turn']:
+        # 复制上一轮的dialog state到curr_turn
+            for key,value in self.DialogState.items():
+                if isinstance(value,dict) and 'prev_turn' in value.keys():
+                    value['curr_turn'] = copy.deepcopy(value['prev_turn'])
+
         if 'clear_state' in self.DialogState['SystemAct']['curr_turn']:
             self.DialogState['BeliefState']['curr_turn'] = {}
             self.DialogState['DetectedDomain']['curr_turn'] = None
             if self.print_details: print('belief state已重置')
+
+
 
     def dialog_state_print(self):
         # dialog state printer
@@ -300,7 +355,7 @@ class DialogStateTracker:
 
 
     def sysact_filter(self):
-
+        # 对系统动作中提到的required slot的过滤函数，滤除一些不合理的slots
         def domain_filter(req_slots, domain):
             # 删除非domain的slot
             # 是否必要：domain detection未必靠谱？
@@ -326,22 +381,35 @@ class DialogStateTracker:
 
         def content_filter(req_slots):
             # 问询套餐内容、超出处理、结转规则时删去子slot
+            if '产品介绍' in req_slots:
+                for slot in req_slots:
+                    if '套餐内容' in slot:
+                        req_slots.remove('产品介绍')
+                        if self.print_details:
+                            print("用户同时问询“产品介绍”和“套餐内容”，"
+                                "只保留“套餐内容“")
+                        break
             if '套餐内容' in req_slots:
                 for slot in req_slots:
                     if '套餐内容_' in slot:
-                        req_slots.remove(slot)
+                        req_slots.remove('套餐内容')
                         if self.print_details:
-                            print("问询项存在“套餐内容”，移除“%s”" %slot)
+                            print("用户同时问询“套餐内容”及其子内容，只保留子内容")
+                        break
             if '超出处理' in req_slots:
                 for slot in req_slots:
-                    if '超出处理_' in slot: req_slots.remove(slot)
-                    if self.print_details:
-                        print("问询项存在“超出处理”，移除“%s”" %slot)
+                    if '超出处理_' in slot:
+                        req_slots.remove('超出处理')
+                        if self.print_details:
+                            print("用户同时问询“超出处理”及其子内容，只保留子内容")
+                        break
             if '结转规则' in req_slots:
                 for slot in req_slots:
-                    if '结转规则_' in slot: req_slots.remove(slot)
-                    if self.print_details:
-                        print("问询项存在“结转规则”，移除“%s”" %slot)
+                    if '结转规则_' in slot:
+                        req_slots.remove('结转规则')
+                        if self.print_details:
+                            print("用户同时问询“结转规则”及其子内容，只保留子内容")
+                        break
             return req_slots
 
         SysAct = self.DialogState['SystemAct']['curr_turn']

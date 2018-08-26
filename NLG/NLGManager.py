@@ -265,7 +265,12 @@ def rule_based_NLG(DST):
     if 'ask_entity' in SysAct.keys():
         nl += "请问您在问哪个业务？"
     if 'sorry' in SysAct.keys():
-        nl += SysAct['sorry']
+        strategy = random.choice([0,1,2])
+        if strategy == 0:
+            nl += '很抱歉，没有找到符合您要求的业务，请您重新描述对费用、包含流量、通话时长的要求~'
+        elif strategy == 1:
+            nl += '很抱歉，目前暂时没有符合您要求的业务，请放宽对费用、包含流量和通话时长的限制~'
+        nl += nl
     if 'chatting' in SysAct.keys():
         strategy = random.choice([0,1,2])
         if strategy == 0:
