@@ -180,7 +180,7 @@ class RulePolicy:
                 return SysAct
 
             if len(self.KB_results) == 0 or self.prev_offer in self.KB_results:
-                # 若没有查询结果，或上一轮的offer在本轮的查询结果中，本论直接提供
+                # 若没有查询结果，或上一轮的offer在本轮的查询结果中，本轮直接提供
                 # 上一轮的offer结果（注意：可能为None）
                 self.new_offer = self.prev_offer
             else:
