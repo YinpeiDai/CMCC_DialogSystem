@@ -15,12 +15,13 @@ from NLU.NLUManager import NLUManager
 from NLG.NLGManager import rule_based_NLG
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--print', type=bool, default=True, help='print details')
+parser.add_argument('-p', '--print', type=bool, default=True, help='print details')
+parser.add_argument('-l', '--logpath', type=str, default='./log.txt', help='saving path of dialog history')
 FLAGS= parser.parse_args()
 
 UserPersonal =  {
             "已购业务": ["180元档幸福流量年包", "18元4G飞享套餐升级版"], # 这里应该是完整的业务的信息dict
-            "使用情况": "剩余流量 11.10 GB，剩余通话 0 分钟，话费余额 110.20 元，本月已产生话费 247.29 元",
+            "套餐使用情况": "剩余流量 11.10 GB，剩余通话 0 分钟，话费余额 110.20 元，本月已产生话费 247.29 元",
             "号码": "18811369685",
             "归属地" : "北京",
             "品牌": "动感地带",
@@ -56,11 +57,14 @@ class DialogAgent:
         try:
             while True:
                 user_utter = input("用户输入：")
-                if user_utter == 'restart' or user_utter == '重来' or user_utter == '重新开始':
+                if user_utter in ['restart' , '重来' , '重新开始']:
                     self.dst = DialogStateTracker(UserPersonal, FLAGS.print)
                     self.rule_policy = RulePolicy()
                     print('对话状态已重置')
                     continue
+                if user_utter in ['结束', '再见']:
+                    self.close()
+                    break
 
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
                 self.dst.update(nlu_results, self.rule_policy, self.data_manager)
@@ -70,8 +74,18 @@ class DialogAgent:
                 self.turn_num += 1
 
         except KeyboardInterrupt:
-            self.nlu_manager.close()
-            print('\n系统: 感谢您的使用，再见！')
+            self.close()
+
+    def close(self):
+        self.nlu_manager.close()
+        reply = '感谢您的使用，再见！'
+        print('系统:', reply, '\n')
+        with open(os.path.join(BASE_DIR, FLAGS.logpath), 'a') as f:
+            for dialog in self.dialog_history:
+                f.write('用户：'+dialog['用户']+'\n')
+                f.write('系统：'+dialog['系统']+'\n')
+            f.write('系统：感谢您的使用，再见！\n')
+            f.write('————————————————————\n')
 
 if __name__ == '__main__':
     agent = DialogAgent()

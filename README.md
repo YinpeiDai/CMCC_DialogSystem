@@ -26,7 +26,9 @@
 ```
 
 
-运行：
-在主目录下运行命令 python Agent.py --print=<whether to print details or not>
-输入restrat可重置dialog state
+### 运行指南
+
+在主目录下运行命令 python Agent.py --print=<whether to print details or not> --logpath=<saving path of dialog history>
+输入restrat可重置dialog state，重新开始对话
+输入"结束"或"再见"可结束对话，保存对话历史
 

@@ -20,6 +20,50 @@ save_path_dict = {
     'sentiment': './SentiDect'
 }
 
+
+infslot_str2num = {
+    '功能费_文字描述': {
+        '低': (0, 50),
+        '中': (50, 200),
+        '高': (200, 900)
+    },
+    '套餐内容_国内流量_文字描述': {
+        '低': (0, 400),
+        '中': (400, 1500),
+        '高': (1500, 37000)
+    },
+    '套餐内容_国内主叫_文字描述': {
+        '低': (0, 400),
+        '中': (400, 1500),
+        '高': (1500, 6000)
+    },
+}
+
+def informable_slot_to_num(belief_state):
+    # 输入一个turn的belief state: dict
+    if '功能费_文字描述' in belief_state:
+        if '功能费' in belief_state:
+            del belief_state['功能费_文字描述']
+        else:
+            fee_str = belief_state['功能费_文字描述']
+            belief_state['功能费'] = infslot_str2num['功能费_文字描述'][fee_str]
+            del belief_state['功能费_文字描述']
+    if '套餐内容_国内流量_文字描述' in belief_state:
+        if '套餐内容_国内流量' in belief_state:
+            del belief_state['套餐内容_国内流量_文字描述']
+        else:
+            fee_str = belief_state['套餐内容_国内流量_文字描述']
+            belief_state['套餐内容_国内流量'] = infslot_str2num['套餐内容_国内流量_文字描述'][fee_str]
+            del belief_state['套餐内容_国内流量_文字描述']
+    if '套餐内容_国内主叫_文字描述' in belief_state:
+        if '套餐内容_国内主叫' in belief_state:
+            del belief_state['套餐内容_国内主叫_文字描述']
+        else:
+            fee_str = belief_state['套餐内容_国内主叫_文字描述']
+            belief_state['套餐内容_国内主叫'] = infslot_str2num['套餐内容_国内主叫_文字描述'][fee_str]
+            del belief_state['套餐内容_国内主叫_文字描述']
+
+
 class NLUManager:
     def __init__(self, save_path_dict):
         self.DomainDetector = DomainDetector(save_path_dict['domain'])
@@ -40,6 +84,7 @@ class NLUManager:
         result['domain'] = self.DomainDetector.get_domain_results(user_utter, data_manager)
         result['useract'] = self.UserActDetector.get_user_act_results(user_utter, data_manager)
         result['informable'] = self.SlotFillingDetector.get_informable_slots_results(user_utter_without_ent, data_manager)
+        informable_slot_to_num(result['informable'])
         result['requestable'] = self.SlotFillingDetector.get_requestable_slots_results(user_utter_without_ent, data_manager)
         result['sentiment'] = None   # TODO: sentimental detection
         result['userutter'] = user_utter
