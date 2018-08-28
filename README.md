@@ -39,7 +39,7 @@
 │          └─ckpt
 └─NLG 				自然语言生成
 ```
-###使用示例
+### 使用示例  
 __示例一__  
 _用户_：最近有什么套餐推荐的  
 _系统_：中移动近期面向北京客户推出了畅享套餐，和4G套餐。通话多的客户可选择商旅套餐。 
@@ -127,3 +127,12 @@ _系统_:您正在进行个人信息查询
 请问您还需要了解其他业务吗？   
 
 _用户_：不用了，谢谢   
+
+
+### Contributor
+
+YiZhi Zhang
+Yinpei Dai
+[Zhijian Ou](http://oa.ee.tsinghua.edu.cn/ouzhijian/index.htm)
+
+_There is data issue, for dialog data access, please contact Pro. Ou_
