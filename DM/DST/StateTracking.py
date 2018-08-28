@@ -58,13 +58,6 @@ DialogStateSample = {
 }
 
 
-def merge_range(range1, range2):
-    # input:  2-element tuples range1 and range2, as value intervals
-    # return: union of them
-    lb = range1[0] if range1[0]<range2[0] else range2[0]
-    ub = range1[1] if range1[1]>range2[1] else range2[1]
-    return (lb, ub)
-
 def rule_based_belief_state_update(usr_act, req_slots, prev_state, prev_offer):
     # 我设想的该函数输入输出和功能应为：
     # usr_act: "要求更多"或"要求更少"
@@ -82,7 +75,7 @@ def rule_based_belief_state_update(usr_act, req_slots, prev_state, prev_offer):
         '套餐内容_国内流量':30720,
         '套餐内容_国内主叫':6000,
     }
-    adjval = 100
+    adjval = 200
 
     new_state = {}
     for slot in req_slots:
@@ -105,29 +98,9 @@ def rule_based_belief_state_update(usr_act, req_slots, prev_state, prev_offer):
 
     return new_state
 
-# def rule_based_offer(usr_act, req_slot, prev_offer):
-#     # 我设想的该函数输入输出和功能应为：
-#     # usr_act: "要求更多"或"要求更少"
-#     # req_slot: "要求更多"或"要求更少"的对象
-#     #           应为"功能费", "套餐内容_国内流量", "套餐内容_国内主叫"的组合
-#     #           注意slot可能是通过informable slot检测出的，也可能是通过requested
-#     #           slot检测出的，这个我可以在上面写一个判断，函数里不用管这个了
-#     # prev_offer: 上一轮的offered entity
-#     # 返回：new_offer——一个新的offer
-
-#     # 应该能解决这种情况:
-#     # 上一轮通过mentioned entity提到了一个业务
-#     # 本轮想要流量更多的之类的
-
-#     # 实现思路应该类似于Ask_more_or_less，我的思路：
-#     # 1. 找到prev_offer提供的实体的主业务，比如38档和4G套餐，就找到和4G套餐
-#     # 2. 在主业务对应的子业务列表中，要求更多就往下一个，要求更少就往上一个
-#     #       要实现这个可能需要改数据库？每个子业务对应的主业务不是None，就简单了
-#     # 3. 如何跨主业务offer：没想好。
-#     pass
 
 class DialogStateTracker:
-    def __init__(self, usr_personal, print_details):
+    def __init__(self, usr_personal, print_details, logger):
         self.DialogState = {
              'TurnNum': 0,
              'EntityMentioned': {'curr_turn': [],  'prev_turn': []},
@@ -146,6 +119,7 @@ class DialogStateTracker:
         self.isUtterChange = True
         self.user_utter = None
         self.print_details = print_details
+        self.logger = logger
 
     def update(self, NLU_results, rule_policy, data_manager):
         """
@@ -163,14 +137,15 @@ class DialogStateTracker:
             if isinstance(value,dict) and 'prev_turn' in value.keys():
                 value['prev_turn'] = copy.deepcopy(value['curr_turn'])
 
-        if self.print_details: print("\n基于规则的DST更新：")
+        if self.print_details: self.logger.info("\n基于规则的DST更新：")
 
         # 优先更新识别准确率相对较高的UsrAct
         if self.DialogState['TurnNum'] == 1 and \
             NLU_results['useract'][0] in [ '要求更多', '要求更少', '更换']:
             self.DialogState['UserAct']['curr_turn'] = ('告知', 0.5)  # TODO: 告知是否合理？
             if self.print_details:
-                print(" - 第一轮不应出现'要求更多', '要求更少', '更换'等用户动作，强制修正为问询")
+                self.logger.info(" - 第一轮不应出现'要求更多', '要求更少', '更换'等用户动作，"
+                                         "强制修正为问询")
         else:
             self.DialogState['UserAct']['curr_turn'] = NLU_results['useract']
 
@@ -182,24 +157,27 @@ class DialogStateTracker:
                 self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
             elif  self.DialogState['TurnNum'] == 1:
                 self.DialogState['DetectedDomain']['curr_turn'] = ('套餐', 0.5)
-                if self.print_details: print(" - 第一轮误识为个人领域，强制修正为套餐领域")
+                if self.print_details:
+                    self.logger.info(" - 第一轮误识为个人领域，强制修正为套餐领域")
             else:
                 self.DialogState['DetectedDomain']['curr_turn'] = (prev_domain, 0.5)
-                if self.print_details: print(" - 本轮误识为个人领域，修正为上一轮的领域")
+                if self.print_details:
+                    self.logger.info(" - 本轮误识为个人领域，修正为上一轮的领域")
         elif prev_domain == None:
             # 包含TurnNum== 1和上一轮执行了clear_state操作的情况
             self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
         elif NLU_results['domain'][0] != prev_domain:
             if self.DialogState['UserAct']['curr_turn'][0] in ['更换','要求更多', '要求更少']:
                 #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
-                if self.print_details: print(" - 本轮用户动作有领域延续性，自动继承上一轮的领域")
+                if self.print_details:
+                    self.logger.info(" - 本轮用户动作有领域延续性，自动继承上一轮的领域")
             elif NLU_results['domain'][1] > 0.7:
                 self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
             else:
                 #pass, 即self.DialogState['DetectedDomain']['curr_turn'] 不变
                 if self.print_details:
-                    print(" - 本轮领域识别结果:", NLU_results['domain'],
-                             "置信度过低，自动继承上一轮的领域")
+                    self.logger.info(" - 本轮领域识别结果:"+str(NLU_results['domain'])+
+                                             "置信度过低，自动继承上一轮的领域")
         else:
             self.DialogState['DetectedDomain']['curr_turn'] = NLU_results['domain']
 
@@ -217,8 +195,8 @@ class DialogStateTracker:
         if self.DialogState['UserAct']['curr_turn'][0] in ['更换']:
             # pass，即self.DialogState['BeliefState']['curr_turn']不变
             if self.print_details:
-                print(" - 本轮的informable slot识别结果：", NLU_results['informable'])
-                print("   由于用户动作为“更换”，自动继承上一轮的belief state")
+                self.logger.info(" - 本轮的informable slot识别结果："+str(NLU_results['informable']))
+                self.logger.info("   由于用户动作为“更换”，自动继承上一轮的belief state")
         elif self.DialogState['UserAct']['curr_turn'][0] in ['要求更多', '要求更少']:
             belief_state = rule_based_belief_state_update(
                                         self.DialogState['UserAct']['curr_turn'][0],
@@ -227,10 +205,10 @@ class DialogStateTracker:
                                         self.DialogState['OfferedResult']['prev_turn'])
             self.DialogState['BeliefState']['curr_turn'] = belief_state
             if self.print_details:
-                print(' - 根据用户动作：要求更多/更少，调整belief state：')
-                print('   from: ', self.DialogState['BeliefState']['prev_turn'])
-                print('     to: ', self.DialogState['BeliefState']['curr_turn'])
-                print("   本轮的informable slot识别结果：", NLU_results['informable'])
+                self.logger.info(' - 根据用户动作：要求更多/更少，调整belief state：')
+                self.logger.info('   from: '+str(self.DialogState['BeliefState']['prev_turn']))
+                self.logger.info('     to: ' + str(self.DialogState['BeliefState']['curr_turn']))
+                self.logger.info("   本轮的informable slot识别结果："+str(NLU_results['informable']))
         else:
             for slot, value in NLU_results['informable'].items():
                 self.DialogState['BeliefState']['curr_turn'][slot] = value
@@ -239,7 +217,7 @@ class DialogStateTracker:
         # self.detected_sentiment = ?
         self.DialogState['EntityMentioned']['curr_turn']= []
         if NLU_results['entity']:
-            if self.print_details: print(" - NLU实体识别结果：", NLU_results['entity'])
+            if self.print_details: self.logger.info(" - NLU实体识别结果："+str(NLU_results['entity']))
             QueryResults = []
             for entity_name in NLU_results['entity']:
                 if entity_name in main_bussiness_dict:
@@ -289,8 +267,8 @@ class DialogStateTracker:
             if isinstance(value, dict) and 'prev_turn' in value.keys():
                 if value['prev_turn'] != value['curr_turn']:
                     self.isDSTChange = True
-        self.isOfferedEntityChange = False if self.DialogState['OfferedResult']['curr_turn'] == \
-           self.DialogState['OfferedResult']['prev_turn'] else True
+        self.isOfferedEntityChange=False if self.DialogState['OfferedResult']['curr_turn']==\
+                                                     self.DialogState['OfferedResult']['prev_turn'] else True
 
         # 打印对话状态
         if self.print_details: self.dialog_state_print()
@@ -304,9 +282,7 @@ class DialogStateTracker:
         if 'clear_state' in self.DialogState['SystemAct']['curr_turn']:
             self.DialogState['BeliefState']['curr_turn'] = {}
             self.DialogState['DetectedDomain']['curr_turn'] = None
-            if self.print_details: print(' - belief state已重置')
-
-
+            if self.print_details: self.logger.info(' - belief state已重置')
 
     def dialog_state_print(self):
         # dialog state printer
@@ -359,7 +335,6 @@ class DialogStateTracker:
         def print_sysact(self):
             SysAct = self.DialogState['SystemAct']
             temp = ' - SystemAct\n'
-            # print(SysAct)
             for turn in ['prev_turn', 'curr_turn']:
                 temp += '   '+turn+': \n'
                 for sysact, content in SysAct[turn].items():
@@ -395,80 +370,85 @@ class DialogStateTracker:
                         temp += str(content)+'\n'
             return temp[:-1]
 
-        print('Dialog State in turn %d:' %self.DialogState['TurnNum'])
-        print(print_entity(self, 'EntityMentioned'))
-        print(print_QR(self))
-        print(print_entity(self, 'OfferedResult'))
-        print(print_NLU(self, 'DetectedDomain'))
-        print(print_NLU(self, 'UserAct'))
-        print(print_NLU(self, 'RequestedSlot'))
-        print(print_NLU(self, 'BeliefState'))
-        print(print_sysact(self))
-        print(' - isDSTChange:' + str(self.isDSTChange))
-        print(' - isUtterChange:' + str(self.isUtterChange))
-        print(' - isOfferedEntityChange:' + str(self.isOfferedEntityChange) + '\n')
+        self.logger.info('Dialog State in turn %d:' %self.DialogState['TurnNum'])
+        self.logger.info(print_entity(self, 'EntityMentioned'))
+        self.logger.info(print_QR(self))
+        self.logger.info(print_entity(self, 'OfferedResult'))
+        self.logger.info(print_NLU(self, 'DetectedDomain'))
+        self.logger.info(print_NLU(self, 'UserAct'))
+        self.logger.info(print_NLU(self, 'RequestedSlot'))
+        self.logger.info(print_NLU(self, 'BeliefState'))
+        self.logger.info(print_sysact(self))
+        self.logger.info(' - isDSTChange:' + str(self.isDSTChange))
+        self.logger.info(' - isUtterChange:' + str(self.isUtterChange))
+        self.logger.info(' - isOfferedEntityChange:' + str(self.isOfferedEntityChange) + '\n')
 
 
     def sysact_filter(self):
         # 对系统动作中提到的required slot的过滤函数，滤除一些不合理的slots
         def domain_filter(req_slots, domain):
-            # 删除非domain的slot
-            # 是否必要：domain detection未必靠谱？
+            # 删除非该domain的slot
+            # TODO: 是否必要：domain detection未必靠谱？
             domain_slots = Domain_DB_slots_mapping[domain]
-            for slot in req_slots:
+            for slot in req_slots[:]:
                 if slot not in domain_slots:
                     req_slots.remove(slot)
-                    if self.print_details: print(' - 删去与本领域无关的slot: '+slot)
+                    if self.print_details: self.logger.info(' - 删去与本领域无关的slot: '+slot)
+            for slot in domain_slots:
+                if slot in self.user_utter:
+                    req_slots.append(slot)
+                    if self.print_details: self.logger.info(' - 增加直接提到的本领域slot: '+slot)
+            req_slots = list(set(req_slots))
             return req_slots
 
         def cost_filter(req_slots):
             # 问询费用，只提供计费方式和功能费中的一个
             if '功能费' in req_slots and '计费方式' in req_slots:
                 req_slots.remove('功能费')
-                if self.print_details: print(' - 删去功能费，只询问计费方式')
+                if self.print_details: self.logger.info(' - 删去功能费，只询问计费方式')
             elif '功能费' in req_slots:
                 offered_entity = self.DialogState['OfferedResult']['curr_turn']
                 if isinstance(offered_entity, list): offered_entity=offered_entity[0]
                 if '功能费' in offered_entity and offered_entity['功能费'] is None:
                     req_slots.insert(0, '计费方式')
-                    if self.print_details: print(' - 功能费为None，提供计费方式')
+                    if self.print_details: self.logger.info(' - 功能费为None，提供计费方式')
             return req_slots
 
         def content_filter(req_slots):
             # 问询套餐内容、超出处理、结转规则时删去子slot
             if '产品介绍' in req_slots:
-                for slot in req_slots:
+                for slot in req_slots[:]:
                     if '套餐内容' in slot:
                         req_slots.remove('产品介绍')
                         if self.print_details:
-                            print(" - 用户同时问询“产品介绍”和“套餐内容”，"
+                            self.logger.info(" - 用户同时问询“产品介绍”和“套餐内容”，"
                                 "只保留“套餐内容“")
                         break
             if '套餐内容' in req_slots:
-                for slot in req_slots:
+                for slot in req_slots[:]:
                     if '套餐内容_' in slot:
                         if slot !='套餐内容_其他功能':
                             req_slots.remove('套餐内容')
                             if self.print_details:
-                                print(" - 用户同时问询“套餐内容”及其子内容，只保留子内容")
+                                self.logger.info(" - 用户同时问询“套餐内容”及其子内容，只保留子内容")
                         else:
                             req_slots.remove('套餐内容_其他功能')
                             if self.print_details:
-                                print(" - 用户同时问询其他内容及套餐内容，只保留套餐内容")
+                                self.logger.info(" - 用户同时问询其他内容及套餐内容，只保留套餐内容")
                         break
             if '超出处理' in req_slots:
-                for slot in req_slots:
+                for slot in req_slots[:]:
                     if '超出处理_' in slot:
                         req_slots.remove('超出处理')
                         if self.print_details:
-                            print(" - 用户同时问询“超出处理”及其子内容，只保留子内容")
+                            self.logger.info(" - 用户同时问询“超出处理”及其子内容，只保留子内容")
                         break
             if '结转规则' in req_slots:
-                for slot in req_slots:
+                for slot in req_slots[:]:
                     if '结转规则_' in slot:
                         req_slots.remove('结转规则')
                         if self.print_details:
-                            print(" - 用户同时问询“结转规则”及其子内容，只保留子内容")
+                            self.logger.info(" - 用户同时问询“结转规则”及其子内容，只保留子内容")
                         break
             return req_slots
 
@@ -479,7 +459,7 @@ class DialogStateTracker:
             req_slots = domain_filter(req_slots, domain)
             req_slots = cost_filter(req_slots)
             req_slots = content_filter(req_slots)
-
+            self.DialogState['SystemAct']['curr_turn']['inform'] = req_slots
 
 if __name__ == '__main__':
     dst = DialogStateTracker(DialogStateSample['UserPersonal'])

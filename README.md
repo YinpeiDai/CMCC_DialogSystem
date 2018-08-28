@@ -1,4 +1,16 @@
-### 系统整体结构如下
+
+### 运行
+
+		在主目录下运行命令 python Agent.py --print=<whether to print details or not> 
+		由于系统仍在调试阶段，默认输出dialog state和DST规则细节
+		
+### 特殊指令
+		
+		系统运行后，输入用户名，可保存用户的对话历史和日志（例: 参考user/zhangyc）
+		输入restrat可重置dialog state，重新开始对话
+		输入"结束"或"再见"可结束对话，保存对话历史
+		
+### 系统结构如下
 
 ```
 ├─DM  			    对话管理器，实现对话状态跟踪和对话策略生成
@@ -26,9 +38,5 @@
 ```
 
 
-### 运行指南
 
-在主目录下运行命令 python Agent.py --print=<whether to print details or not> --logpath=<saving path of dialog history>
-输入restrat可重置dialog state，重新开始对话
-输入"结束"或"再见"可结束对话，保存对话历史
 

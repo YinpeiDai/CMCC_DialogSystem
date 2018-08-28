@@ -74,6 +74,12 @@ def rule_based_NLG(DST):
                     temp += '该套餐的月功能费为：'+value
                     if value.isnumeric(): temp += '元'
                     temp = period_handler(temp, '\n')
+                elif req_slot in ['开通方式', '取消方式', '变更方式']:
+                    if value.isalnum():
+                        temp = period_handler(temp, '该套餐的' +  req_slot+'为：' )
+                        temp += '发送短信代码 '+value+' 到10086\n'
+                    else:
+                        temp = period_handler(temp, '该套餐的' +  req_slot+'为：' + value+'\n')
                 elif '_' in req_slot:
                     if '套餐内容' in req_slot:
                         if not '套餐内容' in prev_req_slot:
@@ -190,10 +196,16 @@ def rule_based_NLG(DST):
         if 'inform' in SysAct:
             prs_info = DST.DialogState['UserPersenal']
             nl += '您正在进行个人信息查询\n'
-            for req_slot in SysAct['inform']:
-                nl += req_slot+'：'+prs_info[req_slot]+'\n'
-            nl += '请问您还需要了解其他业务吗？'
-            return nl
+            if SysAct['inform']:
+                for req_slot in SysAct['inform']:
+                    # if req_slot not in prs_info: continue
+                    nl += req_slot+'：'+str(prs_info[req_slot])+'\n'
+                nl += '请问您还需要了解其他业务吗？'
+                return nl
+            else:
+                nl += '您可以选择查询的个人信息有"已购业务", "订购时间", "套餐使用情况", "号码",'
+                nl += '"归属地", "品牌", "是否转品牌过渡期", "是否停机", "账单查询", "话费充值",'
+                nl += '"流量充值", "话费查询", "流量查询", 请回复您希望查询的内容'
         else:
             print('（领域识别错误）')
             pass

@@ -153,7 +153,7 @@ class RulePolicy:
         self.domain = CurrrentDialogState["DetectedDomain"]["curr_turn"][0]
         self.UsrAct = CurrrentDialogState['UserAct']['curr_turn'][0]
         self.last_SysAct = CurrrentDialogState['SystemAct']['curr_turn'].keys()
-        self.requestable_slots = set(CurrrentDialogState["RequestedSlot"]["curr_turn"])
+        self.requestable_slots = list(set(CurrrentDialogState["RequestedSlot"]["curr_turn"]))
         self.ER = copy.deepcopy(CurrrentDialogState["EntityMentioned"]["curr_turn"])
         self.KB_results = copy.deepcopy(CurrrentDialogState["QueryResults"])
         self.KB_pointer = copy.deepcopy(CurrrentDialogState["OfferedResult"]["prev_turn"])
@@ -165,7 +165,7 @@ class RulePolicy:
         if len(self.DislikeResults)>=len(self.KB_results):
             self.DislikeResults = []
 
-        for entity in self.KB_results:
+        for entity in self.KB_results[:]:
             if entity in self.DislikeResults:
                 self.KB_results.remove(entity)
         # print("== DislikeResults:", self.DislikeResults)
