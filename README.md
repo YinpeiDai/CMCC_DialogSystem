@@ -131,8 +131,8 @@ _用户_：不用了，谢谢
 
 ### Contributor
 
-YiZhi Zhang
-Yinpei Dai
-[Zhijian Ou](http://oa.ee.tsinghua.edu.cn/ouzhijian/index.htm)
+YiZhi Zhang  
+Yinpei Dai  
+[Zhijian Ou](http://oa.ee.tsinghua.edu.cn/ouzhijian/index.htm)  
 
 _There is data issue, for dialog data access, please contact Pro. Ou_
