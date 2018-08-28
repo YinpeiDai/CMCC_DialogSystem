@@ -283,7 +283,14 @@ def rule_based_NLG(DST):
         nl += reqmore_template()
         nl = period_handler(nl, '\n')
     if 'offerhelp' in SysAct.keys():
-        nl += SysAct['domain'] + '：该领域的简要说明（待添加）' #TODO: 问询说明的内容？
+        if SysAct['domain'] == '套餐':
+            nl += "中移动近期面向北京客户推出了畅享套餐，和4G套餐。通话多的客户可选择商旅套餐。\n" \
+                  "流量发烧友们也可以选择畅享不限量套餐。请问您对套餐的费用，流量，通话时长有什么具体要求？"
+        elif SysAct['domain'] == '流量':
+            nl += "中移动近期面向北京移动全品牌推出畅游包，加油包，幸福流量年包，任我用流量包等等。\n" \
+            "请问您对价位和流量有什么要求？"
+        else:
+            nl += SysAct['domain'] + '：该领域的简要说明（待添加）' #TODO: 问询说明的内容？
     if 'ask_entity' in SysAct.keys():
         nl += "请问您在问哪个业务？"
     if 'sorry' in SysAct.keys():

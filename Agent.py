@@ -104,7 +104,7 @@ class DialogAgent:
                     else:
                         print('对话状态已重置')
                     continue
-                if '再见' in user_utter or '结束' in user_utter:
+                if '再见' in user_utter or '结束' in user_utter or '谢谢' in user_utter:
                     self.close()
                     break
                 nlu_results = self.nlu_manager.get_NLU_results(user_utter,  self.data_manager)
