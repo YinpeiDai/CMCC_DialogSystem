@@ -5,14 +5,19 @@
 * python 3.6
 * TensorFlow 1.8
 * jieba 0.39
+* scikit-learn 0.19.2
+* scipy 1.1.0
+* matplotlib 2.2.3
+
 ### 使用方式
 
-		在主目录下运行命令 python Agent.py --print=True/False 
-		由于系统仍在调试阶段，默认print=True，会输出dialog state和DST规则细节
+	在主目录下运行命令 python3 Agent.py --print=True/False 
+	由于系统仍在调试阶段，默认print=True，会输出dialog state和DST规则细节
 		
-		系统运行后，输入用户名，可保存用户的对话历史和日志（例: 参考user/zhangyc）
-		输入'restrat'或'重来'可重置dialog state，重新开始对话
-		输入'结束'或'再见'或'谢谢'可结束对话，保存对话历史
+	系统运行后，输入用户名，可保存用户的对话历史和日志（例: 参考user/zhangyc）
+	输入'restart'或'重来'可重置dialog state，重新开始对话
+	输入'结束'或'再见'或'谢谢'可结束对话，保存对话历史
+	在对话中碰到的问题，可以记录到problem.txt中，反馈给我们
 		
 ### 系统结构
 ```
@@ -131,7 +136,7 @@ _用户_：不用了，谢谢
 
 ### Contributor
 
-YiZhi Zhang  
+Yichi Zhang  
 Yinpei Dai  
 [Zhijian Ou](http://oa.ee.tsinghua.edu.cn/ouzhijian/index.htm)  
 
